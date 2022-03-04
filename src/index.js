@@ -1,12 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+// Pages
+import Home from './home/Home';
+import NewScan from './newscan/NewScan'
+import ErrorPage from './errorpage/ErrorPage'
+
+// Style
 import './index.css';
-import App from './App';
+
+// Components
+import Header from "./comps/Header/Header";
+import Footer from "./comps/Footer/Footer";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router>
+      <Header/>
+      {/* <NavBar/> */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/newscan" element={<NewScan />} />
+          <Route path="*" element={<ErrorPage />}/>
+        </Routes>
+      </Router>
+      <Footer/>
   </React.StrictMode>,
   document.getElementById('root')
 );
