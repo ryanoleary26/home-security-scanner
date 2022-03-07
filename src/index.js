@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom';
 
 // Pages
 import Home from './home/Home';
+import Results from './results/Results'
 import NewScan from './newscan/NewScan'
+import Schedules from './schedules/Schedules'
 import ErrorPage from './errorpage/ErrorPage'
 
 // Style
@@ -11,22 +13,23 @@ import './index.css';
 
 // Components
 import Header from "./comps/Header/Header";
-import Footer from "./comps/Footer/Footer";
+// import Footer from "./comps/Footer/Footer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Router>
-      <Header/>
-      {/* <NavBar/> */}
+      <Router>
+        <Header/>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/results" element={<Results />} />
           <Route path="/newscan" element={<NewScan />} />
+          <Route path="/schedules" element={<Schedules />}/>
           <Route path="*" element={<ErrorPage />}/>
         </Routes>
       </Router>
-      <Footer/>
+      {/* <Footer/> */}
   </React.StrictMode>,
   document.getElementById('root')
 );
