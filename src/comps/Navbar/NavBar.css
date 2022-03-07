@@ -1,20 +1,22 @@
-.navbar {
-    font-size: 20px;
-}
-
-nav {
-    padding: 20px 0px;
-    background: rgb(141, 141, 141);
-    display: flex;
-    justify-content:left;
-}
-
-nav > a {
-    margin: 0px 5px;
-    padding: 10px 10px;
-    background-color: rgb(224, 224, 224);
+.navitem {
+    padding: 10px;
     border-radius: 8px;
-    border-width: 1px;
-    border-color: black;
-    border-style:solid;
+    text-align: center;
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 4px;
+    box-shadow: 0px 2px 1px -1px rgb(0 0 0 / 20%), 0px 1px 1px 0px rgb(0 0 0 / 14%), 0px 1px 3px 0px rgb(0 0 0 / 12%);
+    background-color: #1976d2;
+    text-decoration: none;
+    color: white;
+    transition: background 0.25s ease-in-out;
+}
+
+.navitem:hover {
+    color: rgb(255, 255, 255);
+    background-color: #1565c0;
+    
+}
+
+.navbar {
+    display: flex;
 }
