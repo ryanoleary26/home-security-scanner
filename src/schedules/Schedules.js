@@ -1,14 +1,89 @@
 // Styles
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Schedules.css";
+import '../global.css';
 
 // Components
+import {useState} from 'react';
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { FormControl, InputLabel, Input, FormHelperText } from "@mui/material";
+import { FormControl, InputLabel, Input, FormHelperText, FormLabel, FormGroup, FormControlLabel, Checkbox} from "@mui/material";
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import Stack from '@mui/material/Stack';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import DateTimePicker from '@mui/lab/DateTimePicker';
+import { DataGrid } from '@mui/x-data-grid';
 
 function Schedules() {
+  // Frequency selector state management
+  const [frequency, setFrequency] = useState("");
+
+  // Date state management
+  const [date, setDate] = useState(new Date());
+  const handleDateChange = (newDate) => {
+    setDate(newDate);
+  };
+
+  // Notification checkbox state management
+  const [notificationState, setNotificationState] = useState({
+    complete: false,
+    reminders: false
+  });
+
+  const handleNotificationChange = (event) => {
+    setNotificationState({
+      ...notificationState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const { complete, reminders } = notificationState;
+
+  // Scan intensity checkbox state management
+  const [intensityState, setIntensityState] = useState({
+    intense: false,
+    moderate: false,
+    light: false,
+  });
+
+  const handleIntensityChange = (event) => {
+    setIntensityState({
+      ...intensityState,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const { intense, moderate, light } = intensityState;
+  const error = [intense, moderate, light].filter((v) => v).length !== 1;
+
+  const columns = [
+    { 
+      field: 'toolName', 
+      headerName: 'ID',
+      description: 'The name of the tool that you want to include.', 
+      sortable: false,
+      width: 100,
+      hideable: false
+    },
+    { 
+      field: 'description', 
+      headerName: 'Description',
+      description: 'Tool description.', 
+      sortable: false,
+      width: 300,
+      hideable: false,
+      filterabe: false
+    },
+  ];
+  
+  const rows = [
+    { id: 1, toolName: 'nmap', description: 'Network mapper tool'},
+    { id: 2, toolName: 'masscan', description: 'Scan larger networks'},
+  ];
+
   return (
     <>
       <Grid container sx={{ paddingBottom: 30 }}>
@@ -20,184 +95,114 @@ function Schedules() {
         </Grid>
 
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <section>
             <h2>Create a new schedule</h2>
-            <Box
-              component="form"
-              sx={{
-                "& .MuiTextField-root": { m: 1, width: "25ch" },
-              }}
-              noValidate
-              autoComplete="off"
-            >
-              <div>
-                <TextField
-                  required
-                  id="outlined-required"
-                  label="Required"
-                  defaultValue="Hello World"
-                />
-                <TextField
-                  disabled
-                  id="outlined-disabled"
-                  label="Disabled"
-                  defaultValue="Hello World"
-                />
-                <TextField
-                  id="outlined-password-input"
-                  label="Password"
-                  type="password"
-                  autoComplete="current-password"
-                />
-                <TextField
-                  id="outlined-read-only-input"
-                  label="Read Only"
-                  defaultValue="Hello World"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                />
-                <TextField
-                  id="outlined-number"
-                  label="Number"
-                  type="number"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-                <TextField
-                  id="outlined-search"
-                  label="Search field"
-                  type="search"
-                />
-                <TextField
-                  id="outlined-helperText"
-                  label="Helper text"
-                  defaultValue="Default Value"
-                  helperText="Some important text"
-                />
-              </div>
-              <div>
-                <TextField
-                  required
-                  id="filled-required"
-                  label="Required"
-                  defaultValue="Hello World"
-                  variant="filled"
-                />
-                <TextField
-                  disabled
-                  id="filled-disabled"
-                  label="Disabled"
-                  defaultValue="Hello World"
-                  variant="filled"
-                />
-                <TextField
-                  id="filled-password-input"
-                  label="Password"
-                  type="password"
-                  autoComplete="current-password"
-                  variant="filled"
-                />
-                <TextField
-                  id="filled-read-only-input"
-                  label="Read Only"
-                  defaultValue="Hello World"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  variant="filled"
-                />
-                <TextField
-                  id="filled-number"
-                  label="Number"
-                  type="number"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  variant="filled"
-                />
-                <TextField
-                  id="filled-search"
-                  label="Search field"
-                  type="search"
-                  variant="filled"
-                />
-                <TextField
-                  id="filled-helperText"
-                  label="Helper text"
-                  defaultValue="Default Value"
-                  helperText="Some important text"
-                  variant="filled"
-                />
-              </div>
-              <div>
-                <TextField
-                  required
-                  id="standard-required"
-                  label="Required"
-                  defaultValue="Hello World"
-                  variant="standard"
-                />
-                <TextField
-                  disabled
-                  id="standard-disabled"
-                  label="Disabled"
-                  defaultValue="Hello World"
-                  variant="standard"
-                />
-                <TextField
-                  id="standard-password-input"
-                  label="Password"
-                  type="password"
-                  autoComplete="current-password"
-                  variant="standard"
-                />
-                <TextField
-                  id="standard-read-only-input"
-                  label="Read Only"
-                  defaultValue="Hello World"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  variant="standard"
-                />
-                <TextField
-                  id="standard-number"
-                  label="Number"
-                  type="number"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  variant="standard"
-                />
-                <TextField
-                  id="standard-search"
-                  label="Search field"
-                  type="search"
-                  variant="standard"
-                />
-                <TextField
-                  id="standard-helperText"
-                  label="Helper text"
-                  defaultValue="Default Value"
-                  helperText="Some important text"
-                  variant="standard"
-                />
-              </div>
-            </Box>
-          </section>
+            <Grid container spacing={5}>
+              <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
+                <Box sx={{ minWidth: 120 }}>
+                  <Stack spacing={3}>
+                    <p>Select schedule data and frequency</p>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DateTimePicker
+                          label="Choose schedule start date and time"
+                          value={date}
+                          minDateTime={new Date()}
+                          onChange={handleDateChange}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
+                        {/* <p>Selected date: {date.toString()}</p> */}
+                    </LocalizationProvider>
+
+                    <FormControl>
+                      <InputLabel id="scan-frequency">Scan Frequency</InputLabel>
+                      <Select
+                        labelId="scan-frequenc-label"
+                        id="scan-frequency"
+                        value={frequency}
+                        label="Frequency"
+                        onChange={(e) => {setFrequency(e.target.value);}}
+                      >
+                        <MenuItem value={"Daily"}>Daily</MenuItem>
+                        <MenuItem value={"Weekly"}>Weekly</MenuItem>
+                        <MenuItem value={"Monthly"}>Monthly</MenuItem>
+                      </Select>
+                      {/* <p>Selected schedule frequency: {frequency}</p> */}
+                    </FormControl>
+                    <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
+                      <FormLabel component="legend">Scan Notification Settings</FormLabel>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={complete} onChange={handleNotificationChange} name="complete" />
+                          }
+                          label="Scan complete/failed"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={reminders} onChange={handleNotificationChange} name="reminders" />
+                          }
+                          label="Scan reminders"
+                        />
+                      </FormGroup>
+                    </FormControl>
+                  </Stack>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
+                <Box sx={{ minWidth: 120 }}>
+                  <Stack spacing={3}>
+                    <p>Tool Selection</p>
+                    <div style={{ height: 300, width: '100%' }}>
+                      <DataGrid
+                        rows={rows}
+                        columns={columns}
+                        pageSize={5}
+                        rowsPerPageOptions={[5]}
+                        checkboxSelection
+                      />
+                    </div>
+                    <FormControl 
+                      sx={{ m: 3 }}
+                      component="fieldset" 
+                      variant="standard"
+                      error={error}
+                    >
+                      <FormLabel component="legend">Scan Intensity</FormLabel>
+                      <FormGroup>
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={intense} onChange={handleIntensityChange} name="intense" />
+                          }
+                          label="Intense"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={moderate} onChange={handleIntensityChange} name="moderate" />
+                          }
+                          label="Moderate"
+                        />
+                        <FormControlLabel
+                          control={
+                            <Checkbox checked={light} onChange={handleIntensityChange} name="light" />
+                          }
+                          label="Light"
+                        />
+                      </FormGroup>
+                      
+                    </FormControl>
+                    
+                  </Stack>
+                </Box>
+              </Grid>
+            </Grid>
         </Grid>
 
         <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-          <section>
             <h2>Modify current schedule</h2>
             <FormControl>
               <InputLabel htmlFor="my-input">Email address</InputLabel>
               <Input id="my-input" aria-describedby="my-helper-text" />
               <FormHelperText id="my-helper-text">We'll never share your email.</FormHelperText>
             </FormControl>
-          </section>
         </Grid>
       </Grid>
     </>
