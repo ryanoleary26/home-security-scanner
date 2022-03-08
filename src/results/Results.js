@@ -1,6 +1,7 @@
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Results.css';
+import '../global.css';
 
 // Components
 import Table from '@mui/material/Table';

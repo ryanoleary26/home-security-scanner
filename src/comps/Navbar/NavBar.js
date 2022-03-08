@@ -1,5 +1,6 @@
 // Style
 import './NavBar.css';
+import '../../global.css';
 
 // Components
 import {NavLink} from "react-router-dom";

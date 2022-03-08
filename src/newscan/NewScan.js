@@ -1,6 +1,7 @@
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './NewScan.css';
+import '../global.css';
 
 // Components
 import Grid from '@mui/material/Grid'

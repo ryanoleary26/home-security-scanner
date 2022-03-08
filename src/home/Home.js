@@ -1,6 +1,7 @@
 // Style
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./Home.css";
+import '../global.css';
 
 // Components
 import Button from "@mui/material/Button/";

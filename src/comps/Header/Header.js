@@ -1,5 +1,6 @@
 // Style
 import './Header.css';
+import '../../global.css';
 
 //Components
 import NavBar from "../Navbar/NavBar";

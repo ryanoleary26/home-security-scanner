@@ -1,4 +1,5 @@
 import "./ErrorPage.css";
+import '../global.css';
 
 function ErrorPage() {
   return (
