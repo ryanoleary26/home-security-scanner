@@ -1,3 +1,4 @@
+import React from 'react';
 import './ErrorPage.css';
 import '../global.css';
 

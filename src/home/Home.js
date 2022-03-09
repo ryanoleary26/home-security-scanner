@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Home.css';
@@ -40,7 +42,7 @@ const rows = [
 
 function Home() {
   return (
-    <Grid container>
+    <Grid container sx={{ paddingBottom: 30 }}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <section id="overview">
           <h1>Scan Overview</h1>

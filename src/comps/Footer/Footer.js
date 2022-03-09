@@ -1,7 +1,8 @@
+import React from 'react';
 import './Footer.css';
 import '../../global.css';
 
-function Footer() {
+export default function Footer() {
   return (
     <section className="footer">
       <hr />
@@ -9,4 +10,3 @@ function Footer() {
     </section>
   );
 }
-export default Footer;

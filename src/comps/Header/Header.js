@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Style
 import './Header.css';
 import '../../global.css';
@@ -5,7 +7,7 @@ import '../../global.css';
 // Components
 import NavBar from '../Navbar/NavBar';
 
-function Header() {
+export default function Header() {
   return (
     <>
       <section className="header">
@@ -16,5 +18,3 @@ function Header() {
     </>
   );
 }
-
-export default Header;

@@ -1,10 +1,12 @@
+/* eslint-disable react/jsx-props-no-spreading */
+
 // Styles
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Schedules.css';
 import '../global.css';
 
 // Components
-import { useState } from 'react';
+import { React, useState } from 'react';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
@@ -202,7 +204,7 @@ function Schedules() {
         <FormControl>
           <InputLabel htmlFor="my-input">Email address</InputLabel>
           <Input id="my-input" aria-describedby="my-helper-text" />
-          <FormHelperText id="my-helper-text">We'll never share your email.</FormHelperText>
+          <FormHelperText id="my-helper-text">We`&apos;`ll never share your email.</FormHelperText>
         </FormControl>
       </Grid>
     </Grid>

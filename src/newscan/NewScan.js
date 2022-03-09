@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './NewScan.css';

@@ -1,3 +1,5 @@
+import React from 'react';
+
 // Style
 import './NavBar.css';
 import '../../global.css';
@@ -6,7 +8,7 @@ import '../../global.css';
 import { NavLink } from 'react-router-dom';
 import Stack from '@mui/material/Stack';
 
-function NavBar() {
+export default function NavBar() {
   return (
     <div className="navbar">
       <Stack className="nav" direction={{ xs: 'column', sm: 'row' }} spacing={1}>
@@ -26,5 +28,3 @@ function NavBar() {
     </div>
   );
 }
-
-export default NavBar;
