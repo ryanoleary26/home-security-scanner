@@ -29,7 +29,8 @@
             }
         ],
         "import/prefer-default-export": 0,
-        "react/jsx-uses-vars": "error"
+        "react/jsx-uses-vars": "error",
+        "react/jsx-wrap-multilines": "off"
     },
     "overrides": [
         {
