@@ -11,7 +11,14 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import {
-  FormControl, InputLabel, Input, FormHelperText, FormLabel, FormGroup, FormControlLabel, Checkbox,
+  FormControl,
+  InputLabel,
+  Input,
+  FormHelperText,
+  FormLabel,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -20,49 +27,49 @@ import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import { DataGrid } from '@mui/x-data-grid';
+import { RotateLeft, Send } from '@mui/icons-material';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 function Schedules() {
-  // Frequency selector state management
-  const [frequency, setFrequency] = useState('');
-
-  // Date state management
-  const [date, setDate] = useState(new Date());
-  const handleDateChange = (newDate) => {
-    setDate(newDate);
+  const defaultSchedule = {
+    scanStart: new Date(),
+    frequency: 'weekly',
+    notiComplete: false,
+    notiReminders: false,
+    toolSelection: [],
+    intensity: 'moderate',
   };
 
-  // Notification checkbox state management
-  const [notificationState, setNotificationState] = useState({
-    complete: false,
-    reminders: false,
-  });
+  const [schedule, setSchedule] = useState(defaultSchedule);
 
-  const handleNotificationChange = (event) => {
-    setNotificationState({
-      ...notificationState,
-      [event.target.name]: event.target.checked,
+  // console.log(`Initial schedule: ${JSON.stringify(schedule, null, 2)}`);
+
+  const handleScheduleChange = (e) => {
+    // console.log(`Setting: ${e.target.name} to: ${e.target.value}`);
+    setSchedule({
+      ...schedule,
+      [e.target.name]: e.target.value,
     });
   };
 
-  const { complete, reminders } = notificationState;
-
-  // Scan intensity checkbox state management
-  const [intensityState, setIntensityState] = useState({
-    intense: false,
-    moderate: false,
-    light: false,
-  });
-
-  const handleIntensityChange = (event) => {
-    setIntensityState({
-      ...intensityState,
-      [event.target.name]: event.target.checked,
+  const handleCheckedChange = (e) => {
+    // console.log(`Setting checked of ${e.target.name} to: ${e.target.checked}`);
+    setSchedule({
+      ...schedule,
+      [e.target.name]: e.target.checked,
     });
   };
 
-  const { intense, moderate, light } = intensityState;
-  const error = [intense, moderate, light].filter((v) => v).length !== 1;
+  const handleDateChange = (date) => {
+    // console.log(`Setting date to: ${date}`);
+    setSchedule({
+      ...schedule,
+      scanStart: date,
+    });
+  };
 
+  // Replace with database interaction
   const columns = [
     {
       field: 'toolName',
@@ -82,7 +89,7 @@ function Schedules() {
       filterabe: false,
     },
   ];
-
+  // Replace with database interaction
   const rows = [
     { id: 1, toolName: 'nmap', description: 'Network mapper tool' },
     { id: 2, toolName: 'masscan', description: 'Scan larger networks' },
@@ -106,8 +113,10 @@ function Schedules() {
                 <p>Select schedule data and frequency</p>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DateTimePicker
+                    name="scanStart"
+                    id="scanStart"
                     label="Choose schedule start date and time"
-                    value={date}
+                    value={schedule.scanStart}
                     minDateTime={new Date()}
                     onChange={handleDateChange}
                     renderInput={(params) => <TextField {...params} />}
@@ -115,38 +124,48 @@ function Schedules() {
                   {/* <p>Selected date: {date.toString()}</p> */}
                 </LocalizationProvider>
 
-                <FormControl>
-                  <InputLabel id="scan-frequency">Scan Frequency</InputLabel>
-                  <Select
-                    labelId="scan-frequenc-label"
-                    id="scan-frequency"
-                    value={frequency}
-                    label="Frequency"
-                    onChange={(e) => { setFrequency(e.target.value); }}
-                  >
-                    <MenuItem value="Daily">Daily</MenuItem>
-                    <MenuItem value="Weekly">Weekly</MenuItem>
-                    <MenuItem value="Monthly">Monthly</MenuItem>
-                  </Select>
-                  {/* <p>Selected schedule frequency: {frequency}</p> */}
-                </FormControl>
-                <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-                  <FormLabel component="legend">Scan Notification Settings</FormLabel>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Checkbox checked={complete} onChange={handleNotificationChange} name="complete" />
-                          }
-                      label="Scan complete/failed"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox checked={reminders} onChange={handleNotificationChange} name="reminders" />
-                          }
-                      label="Scan reminders"
-                    />
-                  </FormGroup>
-                </FormControl>
+                <InputLabel id="scan-frequency">Scan Frequency</InputLabel>
+                <Select
+                  labelId="scan-frequency-label"
+                  id="frequency"
+                  name="frequency"
+                  label="Frequency"
+                  value={schedule.frequency}
+                  onChange={handleScheduleChange}
+                >
+                  <MenuItem value="daily">Daily</MenuItem>
+                  <MenuItem value="weekly">Weekly</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                </Select>
+                {/* <p>Selected schedule frequency: {frequency}</p> */}
+
+                <FormLabel component="legend">
+                  Scan Notification Settings
+                </FormLabel>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="notiComplete"
+                        id="notiComplete"
+                        checked={schedule.notiComplete}
+                        onChange={handleCheckedChange}
+                      />
+                    }
+                    label="Scan complete/failed"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="notiReminders"
+                        id="notiReminders"
+                        checked={schedule.notiReminders}
+                        onChange={handleCheckedChange}
+                      />
+                    }
+                    label="Scan reminders"
+                  />
+                </FormGroup>
               </Stack>
             </Box>
           </Grid>
@@ -163,50 +182,51 @@ function Schedules() {
                     checkboxSelection
                   />
                 </div>
-                <FormControl
-                  sx={{ m: 3 }}
-                  component="fieldset"
-                  variant="standard"
-                  error={error}
-                >
-                  <FormLabel component="legend">Scan Intensity</FormLabel>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Checkbox checked={intense} onChange={handleIntensityChange} name="intense" />
-                          }
-                      label="Intense"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox checked={moderate} onChange={handleIntensityChange} name="moderate" />
-                          }
-                      label="Moderate"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox checked={light} onChange={handleIntensityChange} name="light" />
-                          }
-                      label="Light"
-                    />
-                  </FormGroup>
-
+                <FormControl>
+                  <InputLabel id="scan-intensity">Scan Intensity</InputLabel>
+                  <Select
+                    labelId="scan-intensity-label"
+                    name="intensity"
+                    id="intensity"
+                    label="Intensity"
+                    value={schedule.intensity}
+                    onChange={handleScheduleChange}
+                  >
+                    <MenuItem value="intense">Intense</MenuItem>
+                    <MenuItem value="moderate">Moderate</MenuItem>
+                    <MenuItem value="light">Light</MenuItem>
+                  </Select>
+                  {/* <p>Selected schedule frequency: {frequency}</p> */}
                 </FormControl>
-
               </Stack>
             </Box>
           </Grid>
         </Grid>
+        <ButtonGroup
+          variant="contained"
+          aria-label="outlined primary button group"
+        >
+          <Button variant="contained" startIcon={<Send />}>
+            Submit
+          </Button>
+          <Button variant="contained" startIcon={<RotateLeft />}>
+            Reset
+          </Button>
+        </ButtonGroup>
       </Grid>
 
+      {/* Modify schedule section */}
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <h2>Modify current schedule</h2>
         <FormControl>
           <InputLabel htmlFor="my-input">Email address</InputLabel>
           <Input id="my-input" aria-describedby="my-helper-text" />
-          <FormHelperText id="my-helper-text">We`&apos;`ll never share your email.</FormHelperText>
+          <FormHelperText id="my-helper-text">
+            We`&apos;`ll never share your email.
+          </FormHelperText>
         </FormControl>
       </Grid>
+      {/*  */}
     </Grid>
   );
 }
