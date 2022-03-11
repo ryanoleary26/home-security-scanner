@@ -27,7 +27,11 @@ import Grid from '@mui/material/Grid';
 
 function createData(scanNo, scanDate, scanDev, scanVuln, scanReport) {
   return {
-    scanNo, scanDate, scanDev, scanVuln, scanReport,
+    scanNo,
+    scanDate,
+    scanDev,
+    scanVuln,
+    scanReport,
   };
 }
 
@@ -82,7 +86,11 @@ function Home() {
           <h1>New Scan</h1>
           <p>Click the button below to initiate a new scan.</p>
 
-          <Button variant="contained" startIcon={<SearchIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<SearchIcon />}
+            href="/newscan"
+          >
             New Scan
           </Button>
         </section>
@@ -91,7 +99,11 @@ function Home() {
         <section id="schedulescan">
           <h1>Schedule a Scan</h1>
           <p>Click the button below to create a new scan schedule.</p>
-          <Button variant="contained" startIcon={<CalendarIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<CalendarIcon />}
+            href="/schedules"
+          >
             New Schedule
           </Button>
         </section>
@@ -103,7 +115,11 @@ function Home() {
             Click the button below to modify or delete an existing scan
             schedule.
           </p>
-          <Button variant="contained" startIcon={<CalendarIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<CalendarIcon />}
+            href="/schedules#modify"
+          >
             Modify Schedule
           </Button>
         </section>
