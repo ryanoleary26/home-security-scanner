@@ -82,7 +82,6 @@ function NewScan() {
   ];
 
   const handleToolChange = (selectedTools) => {
-    console.table(JSON.stringify(selectedTools));
     // TODO replace rows with reference to a database fetch maybe?
     setSchedule({
       ...schedule,
