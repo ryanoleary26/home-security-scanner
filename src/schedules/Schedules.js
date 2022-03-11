@@ -7,29 +7,28 @@ import '../global.css';
 
 // Components
 import { React, useState } from 'react';
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
 import {
+  Grid,
+  Box,
+  TextField,
   FormControl,
   InputLabel,
-  Input,
-  FormHelperText,
+  // Input,
+  // FormHelperText,
   FormLabel,
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Button,
+  ButtonGroup,
+  Select,
+  Stack,
+  MenuItem,
 } from '@mui/material';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Stack from '@mui/material/Stack';
+import { LocalizationProvider, DateTimePicker } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import DateTimePicker from '@mui/lab/DateTimePicker';
 import { DataGrid } from '@mui/x-data-grid';
 import { RotateLeft, Send } from '@mui/icons-material';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
 
 function Schedules() {
   const defaultSchedule = {
@@ -42,8 +41,6 @@ function Schedules() {
   };
 
   const [schedule, setSchedule] = useState(defaultSchedule);
-
-  // console.log(`Initial schedule: ${JSON.stringify(schedule, null, 2)}`);
 
   const handleScheduleChange = (e) => {
     // console.log(`Setting: ${e.target.name} to: ${e.target.value}`);
@@ -69,15 +66,19 @@ function Schedules() {
     });
   };
 
-  // Replace with database interaction
-  const columns = [
+  const clearState = () => {
+    // console.log('Clearing state!');
+    setSchedule({ ...defaultSchedule });
+  };
+
+  // TODO Replace with database interaction
+  const toolColumns = [
     {
       field: 'toolName',
       headerName: 'ID',
       description: 'The name of the tool that you want to include.',
       sortable: false,
       width: 100,
-      hideable: false,
     },
     {
       field: 'description',
@@ -85,15 +86,22 @@ function Schedules() {
       description: 'Tool description.',
       sortable: false,
       width: 300,
-      hideable: false,
-      filterabe: false,
     },
   ];
-  // Replace with database interaction
-  const rows = [
+  // TODO Replace with database interaction
+  const toolRows = [
     { id: 1, toolName: 'nmap', description: 'Network mapper tool' },
     { id: 2, toolName: 'masscan', description: 'Scan larger networks' },
   ];
+
+  const handleToolChange = (selectedTools) => {
+    console.table(JSON.stringify(selectedTools));
+    // TODO replace rows with reference to a database fetch maybe?
+    setSchedule({
+      ...schedule,
+      toolSelection: selectedTools.map((selected) => toolRows[selected - 1]),
+    });
+  };
 
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
@@ -110,7 +118,7 @@ function Schedules() {
           <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
             <Box sx={{ minWidth: 120 }}>
               <Stack spacing={3}>
-                <p>Select schedule data and frequency</p>
+                <FormLabel>Select schedule data and frequency</FormLabel>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <DateTimePicker
                     name="scanStart"
@@ -121,10 +129,11 @@ function Schedules() {
                     onChange={handleDateChange}
                     renderInput={(params) => <TextField {...params} />}
                   />
-                  {/* <p>Selected date: {date.toString()}</p> */}
                 </LocalizationProvider>
 
-                <InputLabel id="scan-frequency">Scan Frequency</InputLabel>
+                <InputLabel id="scan-frequency-label">
+                  Scan Frequency
+                </InputLabel>
                 <Select
                   labelId="scan-frequency-label"
                   id="frequency"
@@ -137,12 +146,11 @@ function Schedules() {
                   <MenuItem value="weekly">Weekly</MenuItem>
                   <MenuItem value="monthly">Monthly</MenuItem>
                 </Select>
-                {/* <p>Selected schedule frequency: {frequency}</p> */}
 
-                <FormLabel component="legend">
-                  Scan Notification Settings
-                </FormLabel>
                 <FormGroup>
+                  <FormLabel component="legend">
+                    Scan Notification Settings
+                  </FormLabel>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -169,34 +177,42 @@ function Schedules() {
               </Stack>
             </Box>
           </Grid>
+
           <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
             <Box sx={{ minWidth: 120 }}>
               <Stack spacing={3}>
-                <p>Tool Selection</p>
+                <FormLabel>Tool Selection</FormLabel>
                 <div style={{ height: 300, width: '100%' }}>
                   <DataGrid
-                    rows={rows}
-                    columns={columns}
+                    rows={toolRows}
+                    columns={toolColumns}
                     pageSize={5}
                     rowsPerPageOptions={[5]}
                     checkboxSelection
+                    disableColumnFilter
+                    disableColumnSelector
+                    onSelectionModelChange={handleToolChange}
+                    selectionModel={schedule.toolSelection.map(
+                      (tool) => tool.id,
+                    )}
                   />
                 </div>
+
+                <FormLabel>Scan Intensity</FormLabel>
                 <FormControl>
-                  <InputLabel id="scan-intensity">Scan Intensity</InputLabel>
+                  <InputLabel id="scan-intensity-label">Select</InputLabel>
                   <Select
-                    labelId="scan-intensity-label"
                     name="intensity"
                     id="intensity"
                     label="Intensity"
                     value={schedule.intensity}
                     onChange={handleScheduleChange}
+                    labelId="scan-intensity-label"
                   >
                     <MenuItem value="intense">Intense</MenuItem>
                     <MenuItem value="moderate">Moderate</MenuItem>
                     <MenuItem value="light">Light</MenuItem>
                   </Select>
-                  {/* <p>Selected schedule frequency: {frequency}</p> */}
                 </FormControl>
               </Stack>
             </Box>
@@ -205,18 +221,23 @@ function Schedules() {
         <ButtonGroup
           variant="contained"
           aria-label="outlined primary button group"
+          sx={{ paddingTop: 5 }}
         >
           <Button variant="contained" startIcon={<Send />}>
             Submit
           </Button>
-          <Button variant="contained" startIcon={<RotateLeft />}>
+          <Button
+            variant="contained"
+            startIcon={<RotateLeft />}
+            onClick={clearState}
+          >
             Reset
           </Button>
         </ButtonGroup>
       </Grid>
 
       {/* Modify schedule section */}
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+      {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <h2>Modify current schedule</h2>
         <FormControl>
           <InputLabel htmlFor="my-input">Email address</InputLabel>
@@ -225,7 +246,7 @@ function Schedules() {
             We`&apos;`ll never share your email.
           </FormHelperText>
         </FormControl>
-      </Grid>
+      </Grid> */}
       {/*  */}
     </Grid>
   );
