@@ -1,4 +1,7 @@
-import React from 'react';
+/* eslint-disable react/jsx-props-no-spreading */
+
+// import React from 'react';
+import { React, useEffect, useState } from 'react';
 
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -45,11 +48,26 @@ const rows = [
 ];
 
 function Home() {
+  const [initialState, setInitialState] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/')
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        return console.log(res.status);
+      })
+      .then((jsonResponse) => setInitialState(jsonResponse.names));
+  }, []);
+
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <section id="overview">
           <h1>Scan Overview</h1>
+          {initialState.length > 0
+          && initialState.map((name) => <li key={1}>{name}</li>)}
           <TableContainer sx={{ maxWidth: 900 }} component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
@@ -81,6 +99,7 @@ function Home() {
           </TableContainer>
         </section>
       </Grid>
+
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <section id="newscan">
           <h1>New Scan</h1>
