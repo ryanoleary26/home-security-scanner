@@ -1,40 +1,39 @@
-const express = require("express");
-require("dotenv").config();
+var createError = require('http-errors');
+var express = require('express');
+// var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+require('dotenv').config();
+const cors = require('cors');
+
+const indexRouter = require('./routes/index');
+const appRouter = require('./routes/scan');
 
 app = express();
 
-app.use("/api/", require("./routes/hello"));
-// app.get("/", (req, res) => {
-//   res.send("hello ryan");
-// });
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
-// const uri = process.env.MONGO_URI;
-// const client = new MongoClient(uri, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-//   serverApi: ServerApiVersion.v1,
-// });
+app.use(cors());
+app.use('/', indexRouter);
+app.use('/api', appRouter);
 
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
-async function run() {
-  try {
-    await client.connect();
-    const database = client.db("homesec");
-    const haiku = database.collection("scans");
-    // create a document to insert
-    const doc = {
-      title: "Record of a Shriveled Datum",
-      content: "No bytes, no problem. Just insert a document, in MongoDB",
-    };
-    const result = await haiku.insertOne(doc);
-    console.log(`A document was inserted with the _id: ${result.insertedId}`);
-  } finally {
-    await client.close();
-  }
-}
-// run().catch(console.dir);
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+  next(createError(404));
+});
+
+// error handler
+app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  console.log(err.message);
+  res.send('error');
+});
 
 const PORT = process.env.PORT || 3001;
 
