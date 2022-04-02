@@ -1,4 +1,5 @@
 import { React, useState } from 'react';
+import axios from 'axios';
 
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,41 +22,131 @@ import {
   Select,
   Stack,
   MenuItem,
+  FormHelperText,
 } from '@mui/material';
 import { RotateLeft, Send } from '@mui/icons-material';
 
 function NewScan() {
-  const defaultSchedule = {
+  const defaultScan = {
     notiComplete: false,
     notiReminders: false,
     toolSelection: [],
-    intensity: 'moderate',
+    intensity: '',
   };
 
-  const [schedule, setSchedule] = useState(defaultSchedule);
+  const [scan, setScanState] = useState(defaultScan);
 
   const handleCheckedChange = (e) => {
-    // console.log(`Setting checked of ${e.target.name} to: ${e.target.checked}`);
-    setSchedule({
-      ...schedule,
+    setScanState((prevScan) => ({
+      ...prevScan,
       [e.target.name]: e.target.checked,
-    });
+    }));
   };
 
-  const handleScheduleChange = (e) => {
-    // console.log(`Setting: ${e.target.name} to: ${e.target.value}`);
-    setSchedule({
-      ...schedule,
+  const handleIntensityChange = (e) => {
+    setScanState((prevScan) => ({
+      ...prevScan,
       [e.target.name]: e.target.value,
-    });
+    }));
   };
 
-  // const [toolState, setToolStateClear] = useState([]);
+  const defaultErrors = {
+    toolSelection: false,
+    intensity: false,
+  };
 
-  const clearState = () => {
-    // console.log('Clearing state!');
-    setSchedule({ ...defaultSchedule });
-    // setToolStateClear(...[]);
+  const [error, setError] = useState(defaultErrors);
+
+  const clearErrors = () => {
+    setError({ ...defaultErrors });
+  };
+
+  const clearForm = () => {
+    setScanState({ ...defaultScan });
+    setError({ ...defaultErrors });
+  };
+
+  // const toolValidator = (tools) => {
+  //   console.log('       In toolValidator');
+  //   if (tools.length === 0) {
+  //     console.log('           ⚠️Tool Selection invalid');
+  //     setError((prevError) => ({
+  //       ...prevError,
+  //       toolSelection: true,
+  //     }));
+  //     return false;
+  //   } else {
+  //     console.log('           ✅ all good here chief');
+  //     return true;
+  //   }
+  // };
+
+  // const intensityValidator = (inten) => {
+  //   console.log('       In intensityValidator');
+  //   if (inten.length === 0) {
+  //     console.log('           ⚠️Intensity invalid');
+  //     setError((prevError) => ({
+  //       ...prevError,
+  //       intensity: true,
+  //     }));
+  //     return false;
+  //   } else {
+  //     console.log('           ✅ all good here chief');
+  //     return true;
+  //   }
+  // };
+
+  const validateState = () => {
+    // console.log('👉 Inside validateState()');
+    let isValid = true;
+    clearErrors();
+    if (scan.intensity === '') {
+      // console.log('       ⚠️Intensity invalid');
+      setError((prevError) => ({
+        ...prevError,
+        intensity: true,
+      }));
+      isValid = false;
+    }
+    if (scan.toolSelection.length === 0) {
+      // console.log('       ⚠️Tool Selection invalid');
+      setError((prevError) => ({
+        ...prevError,
+        toolSelection: true,
+      }));
+      isValid = false;
+    }
+    // console.log('👈 Leaving validateState()');
+    return isValid;
+  };
+
+  const submit = () => {
+    clearErrors();
+    // console.clear();
+    // console.log('📞Calling validateState()');
+    if (validateState() === false) {
+      // console.log('❌ validateState() returned false');
+      // show error notification?
+    } else {
+      // console.log('✅ all good here chief');
+      // show success notification
+      clearErrors();
+      // console.log(`Sending ${JSON.stringify(scan, null, 4)}`);
+      const newScanData = {
+        notiComplete: scan.notiComplete,
+        notiReminders: scan.notiReminders,
+        toolSelection: scan.toolSelection,
+        intensity: scan.intensity,
+      };
+      axios.post('/api/newScan', newScanData);
+      // .then((response) => {
+      //   console.log(`Received response ${response.status}`);
+      // })
+      // .catch((error) => {
+      //   console.log(error);
+      // });
+      clearForm();
+    }
   };
 
   // TODO Replace with database interaction
@@ -83,10 +174,10 @@ function NewScan() {
 
   const handleToolChange = (selectedTools) => {
     // TODO replace rows with reference to a database fetch maybe?
-    setSchedule({
-      ...schedule,
+    setScanState((prevScan) => ({
+      ...prevScan,
       toolSelection: selectedTools.map((selected) => toolRows[selected - 1]),
-    });
+    }));
   };
 
   return (
@@ -100,7 +191,7 @@ function NewScan() {
 
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Box sx={{ minWidth: 120 }}>
-          <Stack spacing={3}>
+          <Stack spacing={5} direction="column">
             <FormLabel id="tool-selector-label">Tool Selection</FormLabel>
             <div style={{ height: 300, width: '100%' }}>
               <DataGrid
@@ -112,8 +203,15 @@ function NewScan() {
                 disableColumnFilter
                 disableColumnSelector
                 onSelectionModelChange={handleToolChange}
-                selectionModel={schedule.toolSelection.map((tool) => tool.id)}
+                selectionModel={scan.toolSelection.map((tool) => tool.id)}
               />
+
+              <FormHelperText
+                id="component-error-text"
+                error={error.toolSelection}
+              >
+                * Tool Selection is required
+              </FormHelperText>
             </div>
 
             <FormLabel>Scan Intensity</FormLabel>
@@ -123,8 +221,10 @@ function NewScan() {
                 name="intensity"
                 id="intensity"
                 label="Intensity"
-                value={schedule.intensity}
-                onChange={handleScheduleChange}
+                required
+                error={error.intensity}
+                value={scan.intensity}
+                onChange={handleIntensityChange}
                 labelId="scan-intensity-label"
               >
                 <MenuItem value="intense">Intense</MenuItem>
@@ -142,7 +242,7 @@ function NewScan() {
                   <Checkbox
                     name="notiComplete"
                     id="notiComplete"
-                    checked={schedule.notiComplete}
+                    checked={scan.notiComplete}
                     onChange={handleCheckedChange}
                   />
                 }
@@ -153,7 +253,7 @@ function NewScan() {
                   <Checkbox
                     name="notiReminders"
                     id="notiReminders"
-                    checked={schedule.notiReminders}
+                    checked={scan.notiReminders}
                     onChange={handleCheckedChange}
                   />
                 }
@@ -168,15 +268,15 @@ function NewScan() {
         <ButtonGroup
           variant="contained"
           aria-label="outlined primary button group"
-          sx={{ paddingTop: 5 }}
+          sx={{ marginTop: 2 }}
         >
-          <Button variant="contained" startIcon={<Send />}>
+          <Button variant="contained" startIcon={<Send />} onClick={submit}>
             Submit
           </Button>
           <Button
             variant="contained"
             startIcon={<RotateLeft />}
-            onClick={clearState}
+            onClick={clearForm}
           >
             Reset
           </Button>
