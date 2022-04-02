@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "concurrently \"npm run dev\" \"cd client && npm start\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "concurrently \"npm run dev\" \"cd client && npm build\""
   },
   "repository": {
     "type": "git",
