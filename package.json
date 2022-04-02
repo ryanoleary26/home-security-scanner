@@ -1,6 +1,7 @@
 {
   "name": "home-security-scanner-api",
   "version": "0.1.0",
+  "proxy": "http://localhost:3001",
   "description": "Final Year Engineering Project API",
   "main": "index.js",
   "scripts": {
@@ -21,9 +22,14 @@
   "homepage": "https://github.com/ryanoleary26/home-security-scanner#readme",
   "dependencies": {
     "concurrently": "^7.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "mongodb": "^4.4.1",
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.15"
+  },
+  "devDependencies": {
+    "eslint": "^8.12.0"
   }
 }
