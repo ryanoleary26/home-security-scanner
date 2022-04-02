@@ -5,12 +5,44 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
+function verifyInput(input) {
+  if (input.toolSelection === [] || input.intensity === '') {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 router.get('/', function (req, res) {
-  res.send('No data here...');
+  res.sendStatus(405);
 });
 
-/* GET users listing. */
-router.post('/newScan', async function (req, res, next) {
+const validateEmpty = (req, res, next) => {
+  let body = req.body;
+  // console.log(`Body obj: ${JSON.stringify(body)}`);
+  // console.log(`Tool selection: ${JSON.stringify(body.toolSelection)}`);
+  // console.log(`Intensity: ${body.intensity}`);
+
+  // TODO: validation of toolSelection object within body.
+
+  // scenarios that involve badly formed data from client
+  if (
+    body == {} ||
+    body.toolSelection === undefined ||
+    body.toolSelection.length === 0 ||
+    body.intensity === undefined ||
+    body.intensity.length === 0 ||
+    typeof body.notiComplete != 'boolean' ||
+    typeof body.notiReminders != 'boolean'
+  ) {
+    return res.status(400).send({
+      error: 'invalid scan data',
+    });
+  }
+  next();
+};
+
+router.post('/newScan', validateEmpty, async function (req, res) {
   try {
     await client.connect();
     const database = client.db('homesec');
@@ -23,6 +55,29 @@ router.post('/newScan', async function (req, res, next) {
     res.sendStatus(200);
   }
 });
+
+/* GET users listing. */
+// router.post('/newScan', validateEmpty, async function (req, res, next) {
+//   console.log(req.body);
+//   if (verifyInput(req.body)) {
+//     try {
+//       await client.connect();
+//       const database = client.db('homesec');
+//       const collection = database.collection('scans');
+//       const doc = req.body;
+//       response = await collection.insertOne(doc);
+//       console.log(
+//         `A document was inserted with the _id: ${response.insertedId}`,
+//       );
+//     } finally {
+//       await client.close();
+//       res.sendStatus(200);
+//     }
+//   } else {
+//     console.log('Invalid input received from frontend');
+//     res.sendStatus(400);
+//   }
+// });
 
 router.get('/getScans', async function (req, res, next) {
   try {
