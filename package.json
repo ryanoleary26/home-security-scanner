@@ -6,9 +6,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "concurrently \"npm run dev\" \"cd client && npm start\"",
+    "start": "concurrently \"npm run dev\" \"cd client && npm run start\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "concurrently \"npm run dev\" \"cd client && npm build\""
+    "build": "concurrently \"npm run dev\" \"cd client && npm run build\""
   },
   "repository": {
     "type": "git",
