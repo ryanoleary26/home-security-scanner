@@ -23,10 +23,36 @@ import {
   Stack,
   MenuItem,
   FormHelperText,
+  Snackbar,
+  Fade,
+  Alert,
 } from '@mui/material';
 import { RotateLeft, Send } from '@mui/icons-material';
 
 function NewScan() {
+  const [snackState, setSnackState] = useState({
+    open: false,
+    Transition: Fade,
+    message: 'message',
+    type: 'error',
+  });
+
+  const showSnack = (snackMsg, snackType) => {
+    setSnackState({
+      open: true,
+      Transition: Fade,
+      message: snackMsg,
+      type: snackType,
+    });
+  };
+
+  const hideSnack = () => {
+    setSnackState({
+      ...snackState,
+      open: false,
+    });
+  };
+
   const defaultScan = {
     notiComplete: false,
     notiReminders: false,
@@ -127,6 +153,7 @@ function NewScan() {
     if (validateState() === false) {
       // console.log('❌ validateState() returned false');
       // show error notification?
+      showSnack('An error occured', 'error');
     } else {
       // console.log('✅ all good here chief');
       // show success notification
@@ -138,12 +165,17 @@ function NewScan() {
         toolSelection: scan.toolSelection,
         intensity: scan.intensity,
       };
-      axios.post('/api/newScan', newScanData);
-      // .then((response) => {
-      //   console.log(`Received response ${response.status}`);
-      // })
-      // .catch((error) => {
-      //   console.log(error);
+      axios.post('/api/newScan', newScanData).then((response) => {
+        // console.log(`Received response ${response.status}`);
+        if (response.status === 200) {
+          showSnack(
+            `Succesfuly submitted! ${response.data.message} `,
+            'success',
+          );
+        }
+      });
+      // .catch((err) => {
+      //   console.log(err);
       // });
       clearForm();
     }
@@ -281,6 +313,22 @@ function NewScan() {
             Reset
           </Button>
         </ButtonGroup>
+
+        <Snackbar
+          open={snackState.open}
+          onClose={hideSnack}
+          autoHideDuration={6000}
+          TransitionComponent={snackState.Transition}
+          key={snackState.Transition.name}
+        >
+          <Alert
+            onClose={hideSnack}
+            severity={snackState.type}
+            sx={{ width: '100%' }}
+          >
+            {snackState.message}
+          </Alert>
+        </Snackbar>
       </Grid>
     </Grid>
   );
