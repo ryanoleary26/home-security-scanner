@@ -1,17 +1,13 @@
 var express = require('express');
 var router = express.Router();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const {
+  MongoClient,
+  ServerApiVersion,
+  TopologyOpeningEvent,
+} = require('mongodb');
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
-
-function verifyInput(input) {
-  if (input.toolSelection === [] || input.intensity === '') {
-    return false;
-  } else {
-    return true;
-  }
-}
 
 router.get('/', function (req, res) {
   res.sendStatus(405);
@@ -19,40 +15,99 @@ router.get('/', function (req, res) {
 
 const validateEmpty = (req, res, next) => {
   let body = req.body;
-  // console.log(`Body obj: ${JSON.stringify(body)}`);
-  // console.log(`Tool selection: ${JSON.stringify(body.toolSelection)}`);
-  // console.log(`Intensity: ${body.intensity}`);
 
-  // TODO: validation of toolSelection object within body.
-
-  // scenarios that involve badly formed data from client
-  if (
-    body == {} ||
+  // Body obj length needs to be 4 keys
+  if (Object.keys(body).length != 4) {
+    return res.status(400).send({
+      error: `Scan object contained unexpected data.`,
+    });
+  } else if (
+    !body.hasOwnProperty('notiComplete') ||
+    !body.hasOwnProperty('notiReminders') ||
+    !body.hasOwnProperty('toolSelection') ||
+    !body.hasOwnProperty('intensity')
+  ) {
+    // toolSelection exists and contains valid data
+    return res.status(400).send({
+      error: `Scan object contains invalid property names.`,
+    });
+  } else if (
     body.toolSelection === undefined ||
+    body.toolSelection === null ||
     body.toolSelection.length === 0 ||
     body.intensity === undefined ||
+    body.intensity === null ||
     body.intensity.length === 0 ||
     typeof body.notiComplete != 'boolean' ||
     typeof body.notiReminders != 'boolean'
   ) {
     return res.status(400).send({
-      error: 'invalid scan data',
+      error: 'Scan object contained invalid, undefined or null data.',
+    });
+  } else if (body.hasOwnProperty('toolSelection')) {
+    body.toolSelection.map((tool) => {
+      // scan obj has four keys
+      // Check each tool obj for 3 keys
+      if (Object.keys(tool).length != 3) {
+        return res.status(400).send({
+          error: `Tool object contains invalid properties`,
+        });
+      }
+
+      // tool obj does contain 3 keys
+      // check tool obj contains correct keys
+      if (
+        !tool.hasOwnProperty('id') ||
+        !tool.hasOwnProperty('toolName') ||
+        !tool.hasOwnProperty('description')
+      ) {
+        return res.status(400).send({
+          error: `Tool selection object contains invalid property names.`,
+        });
+      }
+      // if tool obj props contain undefined data
+      if (
+        tool.id === undefined ||
+        tool.id === null ||
+        tool.toolName === undefined ||
+        tool.toolName === null ||
+        tool.description === undefined ||
+        tool.description === null
+      ) {
+        return res.status(400).send({
+          error: `Tool ID:${tool.id} - ${tool.toolName} contains undefined or null data`,
+        });
+      }
     });
   }
+  // continue to next
   next();
 };
 
 router.post('/newScan', validateEmpty, async function (req, res) {
-  try {
+  // console.log('before sending');
+  // await client.connect();
+  // const database = client.db('homesec');
+  // const collection = database.collection('scans');
+  // const doc = req.body;
+  // response = await collection.insertOne(doc);
+  // console.log(`A document was inserted with the _id: ${response.insertedId}`);
+  // res.status(200).send({
+  //   message: `A document was inserted with the _id: ${response.insertedId}`,
+  // });
+  // await client.close();
+  // console.log('after sending');
+  if (!res.headersSent) {
     await client.connect();
     const database = client.db('homesec');
     const collection = database.collection('scans');
     const doc = req.body;
     response = await collection.insertOne(doc);
     console.log(`A document was inserted with the _id: ${response.insertedId}`);
-  } finally {
+    res.status(200).send({
+      message: `A document was inserted with the _id: ${response.insertedId}`,
+    });
     await client.close();
-    res.sendStatus(200);
   }
 });
 
@@ -84,21 +139,19 @@ router.get('/getScans', async function (req, res, next) {
     await client.connect();
     const database = client.db('homesec');
     const collection = database.collection('scans');
-
+    docCount = await collection.countDocuments();
     // since this method returns the matched document, not a cursor, print it directly
-    if ((await collection.countDocuments()) === 0) {
-      console.log('No documents found!');
-      res.send({}); //empty object to return
+    if (docCount === 0) {
+      res.status(200).send({ results: 0 }); //empty object to return
     } else {
-      const results = collection.find();
-      res.send(results);
+      const scans = await collection.find({}).toArray();
+      res.status(200).send({ scans, docCount });
     }
-    // change this to await for the results to come, then check if the length of results is 0
-    res.sendStatus(200);
     await client.close();
   } catch (e) {
-    console.log(e);
-    res.sendStatus(500);
+    res.status(500).send({
+      error: e,
+    });
   }
 });
 
