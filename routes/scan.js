@@ -85,18 +85,6 @@ const validateEmpty = (req, res, next) => {
 };
 
 router.post('/newScan', validateEmpty, async function (req, res) {
-  // console.log('before sending');
-  // await client.connect();
-  // const database = client.db('homesec');
-  // const collection = database.collection('scans');
-  // const doc = req.body;
-  // response = await collection.insertOne(doc);
-  // console.log(`A document was inserted with the _id: ${response.insertedId}`);
-  // res.status(200).send({
-  //   message: `A document was inserted with the _id: ${response.insertedId}`,
-  // });
-  // await client.close();
-  // console.log('after sending');
   if (!res.headersSent) {
     await client.connect();
     const database = client.db('homesec');
@@ -110,29 +98,6 @@ router.post('/newScan', validateEmpty, async function (req, res) {
     await client.close();
   }
 });
-
-/* GET users listing. */
-// router.post('/newScan', validateEmpty, async function (req, res, next) {
-//   console.log(req.body);
-//   if (verifyInput(req.body)) {
-//     try {
-//       await client.connect();
-//       const database = client.db('homesec');
-//       const collection = database.collection('scans');
-//       const doc = req.body;
-//       response = await collection.insertOne(doc);
-//       console.log(
-//         `A document was inserted with the _id: ${response.insertedId}`,
-//       );
-//     } finally {
-//       await client.close();
-//       res.sendStatus(200);
-//     }
-//   } else {
-//     console.log('Invalid input received from frontend');
-//     res.sendStatus(400);
-//   }
-// });
 
 router.get('/getScans', async function (req, res, next) {
   try {
@@ -152,6 +117,29 @@ router.get('/getScans', async function (req, res, next) {
     res.status(500).send({
       error: e,
     });
+  }
+});
+
+router.post('/deleteScans', async function (req, res) {
+  try {
+    await client.connect();
+    const database = client.db('homesec');
+    const collection = database.collection('scans');
+    docCount = await collection.countDocuments();
+    if (docCount === 0) {
+      res.status(200).send({
+        message: 'There are no documents to delete.',
+        documentsDeleted: 0,
+      });
+    }
+    const deleteManyResult = await collection.deleteMany({});
+    console.log('Deleted ' + deleteManyResult.deletedCount + ' documents');
+    res.status(200).send({
+      message: `Deleted ${deleteManyResult.deletedCount} documents`,
+      deletedDocuments: deleteManyResult.deletedCount,
+    });
+  } catch (err) {
+    console.log(err);
   }
 });
 
