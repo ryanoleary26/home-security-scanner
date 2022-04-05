@@ -1,10 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {
-  MongoClient,
-  ServerApiVersion,
-  TopologyOpeningEvent,
-} = require('mongodb');
+const { MongoClient } = require('mongodb');
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
@@ -90,22 +86,23 @@ router.post('/newScan', validateEmpty, async function (req, res) {
     const database = client.db('homesec');
     const collection = database.collection('scans');
     const doc = req.body;
-    response = await collection.insertOne(doc);
-    console.log(`A document was inserted with the _id: ${response.insertedId}`);
+    const response = await collection.insertOne(doc);
+    console.log(
+      `A scan document was inserted with the _id: ${response.insertedId}`,
+    );
     res.status(200).send({
-      message: `A document was inserted with the _id: ${response.insertedId}`,
+      message: `A scan document was inserted with the _id: ${response.insertedId}`,
     });
     await client.close();
   }
 });
 
-router.get('/getScans', async function (req, res, next) {
+router.get('/getScans', async function (req, res) {
   try {
     await client.connect();
     const database = client.db('homesec');
     const collection = database.collection('scans');
-    docCount = await collection.countDocuments();
-    // since this method returns the matched document, not a cursor, print it directly
+    const docCount = await collection.countDocuments();
     if (docCount === 0) {
       res.status(200).send({ results: 0 }); //empty object to return
     } else {
@@ -113,9 +110,10 @@ router.get('/getScans', async function (req, res, next) {
       res.status(200).send({ scans, docCount });
     }
     await client.close();
-  } catch (e) {
+  } catch (err) {
     res.status(500).send({
-      error: e,
+      message: 'Internal Server Error',
+      error: err,
     });
   }
 });
@@ -125,7 +123,7 @@ router.post('/deleteScans', async function (req, res) {
     await client.connect();
     const database = client.db('homesec');
     const collection = database.collection('scans');
-    docCount = await collection.countDocuments();
+    const docCount = await collection.countDocuments();
     if (docCount === 0) {
       res.status(200).send({
         message: 'There are no documents to delete.',
@@ -133,13 +131,16 @@ router.post('/deleteScans', async function (req, res) {
       });
     }
     const deleteManyResult = await collection.deleteMany({});
-    console.log('Deleted ' + deleteManyResult.deletedCount + ' documents');
+    // console.log('Deleted ' + deleteManyResult.deletedCount + ' documents');
     res.status(200).send({
       message: `Deleted ${deleteManyResult.deletedCount} documents`,
       deletedDocuments: deleteManyResult.deletedCount,
     });
   } catch (err) {
-    console.log(err);
+    res.status(500).send({
+      message: 'Internal Server Error',
+      error: err,
+    });
   }
 });
 
