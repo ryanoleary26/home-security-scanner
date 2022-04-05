@@ -4,7 +4,8 @@ var logger = require('morgan');
 require('dotenv').config();
 const cors = require('cors');
 
-const appRouter = require('./routes/scan');
+const scanRouter = require('./routes/scan');
+const scheduleRouter = require('./routes/schedule');
 
 app = express();
 
@@ -14,7 +15,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(cors());
 // app.use('/', indexRouter);
-app.use('/api', appRouter);
+app.use('/scan', scanRouter);
+app.use('/schedule', scheduleRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
