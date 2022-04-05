@@ -165,13 +165,15 @@ function NewScan() {
         toolSelection: scan.toolSelection,
         intensity: scan.intensity,
       };
-      axios.post('/api/newScan', newScanData).then((response) => {
+      axios.post('/scan/newScan', newScanData).then((response) => {
         // console.log(`Received response ${response.status}`);
         if (response.status === 200) {
           showSnack(
             `Succesfuly submitted! ${response.data.message} `,
             'success',
           );
+        } else {
+          showSnack(`An error occured ${response.status}`, 'error');
         }
       });
       // .catch((err) => {
@@ -223,7 +225,7 @@ function NewScan() {
 
       <Grid item xs={12} sm={12} md={6} lg={6} xl={6}>
         <Box sx={{ minWidth: 120 }}>
-          <Stack spacing={5} direction="column">
+          <Stack spacing={2} direction="column">
             <FormLabel id="tool-selector-label">Tool Selection</FormLabel>
             <div style={{ height: 300, width: '100%' }}>
               <DataGrid
@@ -246,7 +248,7 @@ function NewScan() {
               </FormHelperText>
             </div>
 
-            <FormLabel>Scan Intensity</FormLabel>
+            <FormLabel sx={{ marginTop: '32px' }}>Scan Intensity</FormLabel>
             <FormControl>
               <InputLabel id="scan-intensity-label">Select</InputLabel>
               <Select
