@@ -129,13 +129,13 @@ router.post('/deleteScans', async function (req, res) {
         message: 'There are no documents to delete.',
         documentsDeleted: 0,
       });
+    } else {
+      const deleteManyResult = await collection.deleteMany({});
+      res.status(200).send({
+        message: `Deleted ${deleteManyResult.deletedCount} documents`,
+        deletedDocuments: deleteManyResult.deletedCount,
+      });
     }
-    const deleteManyResult = await collection.deleteMany({});
-    // console.log('Deleted ' + deleteManyResult.deletedCount + ' documents');
-    res.status(200).send({
-      message: `Deleted ${deleteManyResult.deletedCount} documents`,
-      deletedDocuments: deleteManyResult.deletedCount,
-    });
   } catch (err) {
     res.status(500).send({
       message: 'Internal Server Error',

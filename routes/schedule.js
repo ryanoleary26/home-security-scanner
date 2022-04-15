@@ -12,10 +12,6 @@ router.get('/', function (req, res) {
 
 const validateEmpty = (req, res, next) => {
   let body = req.body;
-  console.log('inside validateEmpty()');
-  console.log(`Scan Start date is ${body.scanStart}`);
-  console.log(`${isValidDate(body.scanStart)}`);
-  console.log(typeof body.scanStart);
   // TODO: change this to schedule format
   // Body obj length needs to be 6 keys
   if (Object.keys(body).length != 6) {
@@ -117,10 +113,10 @@ router.get('/getSchedules', async function (req, res) {
     const collection = database.collection('schedules');
     const docCount = await collection.countDocuments();
     if (docCount === 0) {
-      res.status(200).send({ results: 0 }); //empty object to return
+      res.status(204).send(); //empty object to return
     } else {
       const schedules = await collection.find({}).toArray();
-      res.status(200).send({ scans: schedules, docCount });
+      res.status(200).send({ schedules: schedules, docCount });
     }
     await client.close();
   } catch (err) {
@@ -142,19 +138,17 @@ router.post('/deleteSchedules', async function (req, res) {
         message: 'There are no documents to delete.',
         documentsDeleted: 0,
       });
+    } else {
+      const deleteManyResult = await collection.deleteMany({});
+      res.status(200).send({
+        message: `Deleted ${deleteManyResult.deletedCount} schedule documents`,
+        deletedDocuments: deleteManyResult.deletedCount,
+      });
     }
-    const deleteManyResult = await collection.deleteMany({});
-    // console.log(
-    //   'Deleted ' + deleteManyResult.deletedCount + ' schedule documents',
-    // );
-    res.status(200).send({
-      message: `Deleted ${deleteManyResult.deletedCount} schedule documents`,
-      deletedDocuments: deleteManyResult.deletedCount,
-    });
-  } catch (err) {
+  } catch (e) {
     res.status(500).send({
       message: 'Internal Server Error',
-      error: err,
+      error: e,
     });
   }
 });
