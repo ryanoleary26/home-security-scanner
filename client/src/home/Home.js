@@ -107,6 +107,7 @@ function Home() {
             variant="contained"
             startIcon={<CalendarIcon />}
             href="/schedules"
+            disabled
           >
             New Schedule
           </Button>
@@ -123,6 +124,7 @@ function Home() {
             variant="contained"
             startIcon={<CalendarIcon />}
             href="/schedules#modify"
+            disabled
           >
             Modify Schedule
           </Button>
