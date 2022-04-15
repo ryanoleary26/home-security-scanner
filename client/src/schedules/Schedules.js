@@ -226,15 +226,15 @@ function Schedules() {
       try {
         axios.post('/schedule/newSchedule', schedule).then((response) => {
         // console.log(`Received response ${response.status}`);
-        if (response.status === 200) {
-          showSnack(
-            `Succesfuly submitted! ${response.data.message} `,
-            'success',
-          );
-        } else {
-          showSnack(`An error occured ${response.status}`, 'error');
-        }
-      });
+          if (response.status === 200) {
+            showSnack(
+              `Succesfuly submitted! ${response.data.message} `,
+              'success',
+            );
+          } else {
+            showSnack(`An error occured ${response.status}`, 'error');
+          }
+        });
       } catch (e) {
         showSnack(`An error occured ${e}`, 'error');
       }
