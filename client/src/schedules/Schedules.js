@@ -6,7 +6,7 @@ import './Schedules.css';
 import '../global.css';
 
 // Components
-import { React, useState } from 'react';
+import { React, useEffect, useState, useMemo } from 'react'; // eslint-disable-line object-curly-newline
 import axios from 'axios';
 import { isValid as validateDate, format } from 'date-fns';
 import {
@@ -15,7 +15,6 @@ import {
   TextField,
   FormControl,
   InputLabel,
-  // Input,
   FormHelperText,
   FormLabel,
   FormGroup,
@@ -29,11 +28,19 @@ import {
   Alert,
   Snackbar,
   Fade,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
 } from '@mui/material';
 import { LocalizationProvider, DateTimePicker } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { DataGrid } from '@mui/x-data-grid';
-import { RotateLeft, Send } from '@mui/icons-material';
+import { RotateLeft, Send, Delete } from '@mui/icons-material';
 
 function Schedules() {
   const [snackState, setSnackState] = useState({
@@ -87,13 +94,8 @@ function Schedules() {
   };
 
   const handleDateChange = (date) => {
-    // Date object
-    // console.log(`Setting date to: ${date}`);
-    // console.log(typeof date);
-    // console.log(isValid(date));
-
     // Convert date object to string
-    const formattedDate = format(date, 'HH:mm:ss dd/MM/yyyy OOOO');
+    // const formattedDate = format(date, 'HH:mm:ss dd/MM/yyyy OOOO');
     // console.log(formattedDate);
     // console.log(typeof formattedDate);
     // console.log(isValid(formattedDate));
@@ -106,7 +108,7 @@ function Schedules() {
 
     setScheduleState({
       ...schedule,
-      scanStart: formattedDate,
+      scanStart: date,
     });
   };
 
@@ -221,7 +223,8 @@ function Schedules() {
       //   toolSelection: schedule.toolSelection,
       //   intensity: schedule.intensity,
       // };
-      axios.post('/schedule/newSchedule', schedule).then((response) => {
+      try {
+        axios.post('/schedule/newSchedule', schedule).then((response) => {
         // console.log(`Received response ${response.status}`);
         if (response.status === 200) {
           showSnack(
@@ -232,15 +235,135 @@ function Schedules() {
           showSnack(`An error occured ${response.status}`, 'error');
         }
       });
-      // .catch((err) => {
-      //   console.log(err);
-      // });
+      } catch (e) {
+        showSnack(`An error occured ${e}`, 'error');
+      }
       clearForm();
     }
   };
 
+  const deleteSchedules = () => {
+    try {
+      axios.post('/schedule/deleteSchedules', schedule).then((response) => {
+        // console.log(`Received response ${response.status}`);
+        if (response.status === 200) {
+          showSnack(
+            `${response.data.message} `,
+            'success',
+          );
+        } else {
+          showSnack(`An error occured ${response.status}`, 'error');
+        }
+      });
+    } catch (e) {
+      showSnack(`An error occured ${e}`, 'error');
+    }
+  };
+
+  const [loadingScheduleData, setLoadingScheduleData] = useState(true);
+  const [scheduleData, setScheduleData] = useState([]);
+  const columns = useMemo(() => [
+    {
+      Header: 'Start Date/Time',
+      id: 1,
+    },
+    {
+      Header: 'Tool Selection',
+      id: 2,
+    },
+    {
+      Header: 'Scan Frequency',
+      id: 3,
+    },
+    {
+      Header: 'Scan Intensity',
+      id: 4,
+    },
+    {
+      Header: 'Complete/Failed Notifications',
+      id: 5,
+    },
+    {
+      Header: 'Reminder Notifications',
+      id: 6,
+    },
+  ]);
+
+  // const newColumns = [
+  //   {
+  //     field: 'startDateTime',
+  //     headerName: 'Start Date/Time',
+  //     description: 'desc',
+  //     sortable: false,
+  //     width: 200,
+  //   },
+  //   {
+  //     field: 'toolSelection',
+  //     headerName: 'Tool Selection',
+  //     description: 'desc',
+  //     sortable: false,
+  //     width: 200,
+  //   },
+  //   {
+  //     field: 'frequency',
+  //     headerName: 'Scan Frequency',
+  //     description: 'desc',
+  //     sortable: false,
+  //     width: 200,
+  //   },
+  //   {
+  //     field: 'intensity',
+  //     headerName: 'Scan Intensity',
+  //     description: 'desc',
+  //     sortable: false,
+  //     width: 200,
+  //   },
+  //   {
+  //     field: 'notiComplete',
+  //     headerName: 'Complete/Failed Notifications',
+  //     description: 'desc',
+  //     sortable: false,
+  //     width: 200,
+  //   },
+  //   {
+  //     field: 'notiReminders',
+  //     headerName: 'Reminder Notifications',
+  //     description: 'desc',
+  //     sortable: false,
+  //     width: 200,
+  //   },
+  // ];
+
+  useEffect(() => {
+    async function getData() {
+      try {
+        await axios.get('/schedule/getSchedules').then((response) => {
+          switch (response.status) {
+            case 200:
+              // console.log(response.data.schedules);
+              setScheduleData(response.data);
+              setLoadingScheduleData(false);
+              break;
+
+            case 204:
+              showSnack('There are no schedule records to show', 'info');
+              break;
+
+            default:
+              console.log('generic switch behaviour');
+          }
+        });
+      } catch (e) {
+        showSnack(`Could not reach API. \n${e} `, 'error');
+      }
+    }
+    if (loadingScheduleData) {
+      getData();
+    }
+  }, []);
+
   return (
-    <Grid container sx={{ paddingBottom: 30 }}>
+    <Grid container spacing={2} sx={{ paddingBottom: 30 }}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <section>
           <h1>Scan Schedules</h1>
@@ -262,6 +385,7 @@ function Schedules() {
                     label="Choose schedule start date and time"
                     value={schedule.scanStart}
                     minDateTime={new Date()}
+                    mask="HH:mm:ss dd/MM/yyyy OOOO"
                     onChange={handleDateChange}
                     renderInput={(params) => <TextField {...params} />}
                   />
@@ -279,9 +403,9 @@ function Schedules() {
                     onChange={handleScheduleChange}
                     error={error.frequency}
                   >
-                    <MenuItem value="daily">Daily</MenuItem>
-                    <MenuItem value="weekly">Weekly</MenuItem>
-                    <MenuItem value="monthly">Monthly</MenuItem>
+                    <MenuItem value="Daily">Daily</MenuItem>
+                    <MenuItem value="Weekly">Weekly</MenuItem>
+                    <MenuItem value="Monthly">Monthly</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -354,9 +478,9 @@ function Schedules() {
                     labelId="scan-intensity-label"
                     error={error.intensity}
                   >
-                    <MenuItem value="intense">Intense</MenuItem>
-                    <MenuItem value="moderate">Moderate</MenuItem>
-                    <MenuItem value="light">Light</MenuItem>
+                    <MenuItem value="Intense">Intense</MenuItem>
+                    <MenuItem value="Moderate">Moderate</MenuItem>
+                    <MenuItem value="Light">Light</MenuItem>
                   </Select>
                 </FormControl>
               </Stack>
@@ -383,7 +507,7 @@ function Schedules() {
         <Snackbar
           open={snackState.open}
           onClose={hideSnack}
-          autoHideDuration={6000}
+          // autoHideDuration={6000}
           TransitionComponent={snackState.Transition}
           key={snackState.Transition.name}
         >
@@ -398,16 +522,71 @@ function Schedules() {
       </Grid>
 
       {/* Modify schedule section */}
-      {/* <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <h2>Modify current schedule</h2>
-        <FormControl>
-          <InputLabel htmlFor="my-input">Email address</InputLabel>
-          <Input id="my-input" aria-describedby="my-helper-text" />
-          <FormHelperText id="my-helper-text">
-            We`&apos;`ll never share your email.
-          </FormHelperText>
-        </FormControl>
-      </Grid> */}
+      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+        {loadingScheduleData ? (
+          <h2>Existing schedules &#40;?&#41; </h2>
+        ) : (
+          <h2>
+            Existing schedules &#40;
+            {scheduleData.docCount}
+            &#41;
+          </h2>
+        )}
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell key={col.id}>{col.Header}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loadingScheduleData ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <CircularProgress />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                scheduleData.schedules.map((row) => (
+                  <TableRow key={row._id}>
+                    <TableCell component="th" scope="row">
+                      {format(new Date(row.scanStart), 'MM/dd/yyyy HH:mm')}
+                    </TableCell>
+                    <TableCell>
+                      {row.toolSelection.map((tool) => (
+                        <li key={tool.id}>{`${tool.toolName} - ${tool.description}`}</li>
+                      ))}
+                    </TableCell>
+                    <TableCell>{row.frequency}</TableCell>
+                    <TableCell>{row.intensity}</TableCell>
+                    <TableCell>{row.notiComplete ? 'Yes' : 'No'}</TableCell>
+                    <TableCell>{row.notiReminders ? 'Yes' : 'No'}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* <DataGrid
+          rows={scheduleData.schedules}
+          columns={newColumns}
+          pageSize={5}
+          rowsPerPageOptions={[5]}
+          getRowId={(row) => row._id} // eslint-disable-line no-underscore-dangle
+        /> */}
+
+        <Button
+          variant="outlined"
+          startIcon={<Delete />}
+          color="error"
+          onClick={deleteSchedules}
+        >
+          Delete all Schedules
+        </Button>
+      </Grid>
       {/*  */}
     </Grid>
   );
