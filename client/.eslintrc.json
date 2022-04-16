@@ -32,7 +32,8 @@
         "import/prefer-default-export": 0,
         "react/jsx-uses-vars": "error",
         "react/jsx-wrap-multilines": "off",
-        "no-underscore-dangle": "off"
+        "no-underscore-dangle": "off",
+        "linebreak-style": 0
     },
     "overrides": [
         {
