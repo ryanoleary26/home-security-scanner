@@ -1,4 +1,9 @@
-import { React, useState } from 'react';
+import {
+  React,
+  useState,
+  useMemo,
+  useEffect,
+} from 'react';
 import axios from 'axios';
 
 // Style
@@ -8,6 +13,7 @@ import '../global.css';
 
 // Components
 import { DataGrid } from '@mui/x-data-grid';
+import { format } from 'date-fns';
 import {
   Grid,
   Box,
@@ -26,6 +32,14 @@ import {
   Snackbar,
   Fade,
   Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
 } from '@mui/material';
 import { RotateLeft, Send } from '@mui/icons-material';
 
@@ -164,21 +178,23 @@ function NewScan() {
         notiReminders: scan.notiReminders,
         toolSelection: scan.toolSelection,
         intensity: scan.intensity,
+        scanDate: new Date(),
       };
-      axios.post('/scan/newScan', newScanData).then((response) => {
-        // console.log(`Received response ${response.status}`);
-        if (response.status === 200) {
-          showSnack(
-            `Succesfuly submitted! ${response.data.message} `,
-            'success',
-          );
-        } else {
-          showSnack(`An error occured ${response.status}`, 'error');
-        }
-      });
-      // .catch((err) => {
-      //   console.log(err);
-      // });
+      try {
+        axios.post('/scan/newScan', newScanData).then((response) => {
+          // console.log(`Received response ${response.status}`);
+          if (response.status === 200) {
+            showSnack(
+              `Succesfuly submitted! ${response.data.message} `,
+              'success',
+            );
+          } else {
+            showSnack(`An error occured ${response.status}`, 'error');
+          }
+        });
+      } catch (e) {
+        showSnack(`An error occured ${e}`, 'error');
+      }
       clearForm();
     }
   };
@@ -213,6 +229,64 @@ function NewScan() {
       toolSelection: selectedTools.map((selected) => toolRows[selected - 1]),
     }));
   };
+
+  // ====================================
+  const [loadingScanData, setLoadingScanData] = useState(true);
+  const [scanData, setScanData] = useState([]);
+  const columns = useMemo(() => [
+    {
+      Header: 'Scan ID',
+      id: 1,
+    },
+    {
+      Header: 'Scan Date/Time',
+      id: 2,
+    },
+    {
+      Header: 'Tool Selection',
+      id: 3,
+    },
+    {
+      Header: 'Scan Intensity',
+      id: 4,
+    },
+    {
+      Header: 'Complete/Failed Notifications',
+      id: 5,
+    },
+    {
+      Header: 'Reminder Notifications',
+      id: 6,
+    },
+  ]);
+
+  useEffect(() => {
+    async function getData() {
+      try {
+        await axios.get('/scan/getScans').then((response) => {
+          switch (response.status) {
+            case 200:
+              // console.log(response.data.schedules);
+              setScanData(response.data);
+              setLoadingScanData(false);
+              break;
+
+            case 204:
+              showSnack('There are no scan records to show', 'info');
+              break;
+
+            default:
+              showSnack('Recieved an unexpected response from API', 'error');
+          }
+        });
+      } catch (e) {
+        showSnack(`Could not reach API. \n${e} `, 'error');
+      }
+    }
+    if (loadingScanData) {
+      getData();
+    }
+  }, []);
 
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
@@ -261,9 +335,9 @@ function NewScan() {
                 onChange={handleIntensityChange}
                 labelId="scan-intensity-label"
               >
-                <MenuItem value="intense">Intense</MenuItem>
-                <MenuItem value="moderate">Moderate</MenuItem>
-                <MenuItem value="light">Light</MenuItem>
+                <MenuItem value="Intense">Intense</MenuItem>
+                <MenuItem value="Moderate">Moderate</MenuItem>
+                <MenuItem value="Light">Light</MenuItem>
               </Select>
             </FormControl>
 
@@ -319,7 +393,7 @@ function NewScan() {
         <Snackbar
           open={snackState.open}
           onClose={hideSnack}
-          autoHideDuration={6000}
+          // autoHideDuration={6000}
           TransitionComponent={snackState.Transition}
           key={snackState.Transition.name}
         >
@@ -332,6 +406,56 @@ function NewScan() {
           </Alert>
         </Snackbar>
       </Grid>
+
+      {/* Scan History section */}
+      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+        {loadingScanData ? (
+          <h2>Scan History &#40;?&#41; </h2>
+        ) : (
+          <h2>
+            Scan History &#40;
+            {scanData.docCount}
+            &#41;
+          </h2>
+        )}
+
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell key={col.id}>{col.Header}</TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loadingScanData ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <CircularProgress />
+                  </TableCell>
+                </TableRow>
+              ) : (
+                scanData.scans.map((row) => (
+                  <TableRow key={row._id}>
+                    <TableCell>{row._id}</TableCell>
+                    <TableCell>{format(new Date(row.scanDate), 'dd/MM/yyyy HH:mm')}</TableCell>
+                    <TableCell>
+                      {row.toolSelection.map((tool) => (
+                        <li key={tool.id}>{tool.toolName}</li>
+                      ))}
+                    </TableCell>
+                    <TableCell>{row.intensity}</TableCell>
+                    <TableCell>{row.notiComplete ? 'Yes' : 'No'}</TableCell>
+                    <TableCell>{row.notiReminders ? 'Yes' : 'No'}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Grid>
+      {/*  */}
     </Grid>
   );
 }
