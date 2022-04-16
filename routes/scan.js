@@ -12,8 +12,8 @@ router.get('/', function (req, res) {
 const validateEmpty = (req, res, next) => {
   let body = req.body;
 
-  // Body obj length needs to be 4 keys
-  if (Object.keys(body).length != 4) {
+  // Body obj length needs to be 5 keys
+  if (Object.keys(body).length != 5) {
     return res.status(400).send({
       error: `Scan object contained unexpected data.`,
     });
@@ -21,7 +21,8 @@ const validateEmpty = (req, res, next) => {
     !body.hasOwnProperty('notiComplete') ||
     !body.hasOwnProperty('notiReminders') ||
     !body.hasOwnProperty('toolSelection') ||
-    !body.hasOwnProperty('intensity')
+    !body.hasOwnProperty('intensity') ||
+    !body.hasOwnProperty('scanDate')
   ) {
     // toolSelection exists and contains valid data
     return res.status(400).send({
@@ -35,7 +36,9 @@ const validateEmpty = (req, res, next) => {
     body.intensity === null ||
     body.intensity.length === 0 ||
     typeof body.notiComplete != 'boolean' ||
-    typeof body.notiReminders != 'boolean'
+    typeof body.notiReminders != 'boolean' ||
+    body.scanDate === undefined ||
+    body.scanDate === null
   ) {
     return res.status(400).send({
       error: 'Scan object contained invalid, undefined or null data.',
@@ -104,7 +107,7 @@ router.get('/getScans', async function (req, res) {
     const collection = database.collection('scans');
     const docCount = await collection.countDocuments();
     if (docCount === 0) {
-      res.status(200).send({ results: 0 }); //empty object to return
+      res.status(204).send(); //empty object to return
     } else {
       const scans = await collection.find({}).toArray();
       res.status(200).send({ scans, docCount });
