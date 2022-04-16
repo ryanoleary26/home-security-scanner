@@ -264,75 +264,34 @@ function Schedules() {
   const [scheduleData, setScheduleData] = useState([]);
   const columns = useMemo(() => [
     {
-      Header: 'Start Date/Time',
+      Header: 'Schedule ID',
       id: 1,
     },
     {
-      Header: 'Tool Selection',
+      Header: 'Start Date/Time',
       id: 2,
     },
     {
-      Header: 'Scan Frequency',
+      Header: 'Tool Selection',
       id: 3,
     },
     {
-      Header: 'Scan Intensity',
+      Header: 'Scan Frequency',
       id: 4,
     },
     {
-      Header: 'Complete/Failed Notifications',
+      Header: 'Scan Intensity',
       id: 5,
     },
     {
-      Header: 'Reminder Notifications',
+      Header: 'Complete/Failed Notifications',
       id: 6,
     },
+    {
+      Header: 'Reminder Notifications',
+      id: 7,
+    },
   ]);
-
-  // const newColumns = [
-  //   {
-  //     field: 'startDateTime',
-  //     headerName: 'Start Date/Time',
-  //     description: 'desc',
-  //     sortable: false,
-  //     width: 200,
-  //   },
-  //   {
-  //     field: 'toolSelection',
-  //     headerName: 'Tool Selection',
-  //     description: 'desc',
-  //     sortable: false,
-  //     width: 200,
-  //   },
-  //   {
-  //     field: 'frequency',
-  //     headerName: 'Scan Frequency',
-  //     description: 'desc',
-  //     sortable: false,
-  //     width: 200,
-  //   },
-  //   {
-  //     field: 'intensity',
-  //     headerName: 'Scan Intensity',
-  //     description: 'desc',
-  //     sortable: false,
-  //     width: 200,
-  //   },
-  //   {
-  //     field: 'notiComplete',
-  //     headerName: 'Complete/Failed Notifications',
-  //     description: 'desc',
-  //     sortable: false,
-  //     width: 200,
-  //   },
-  //   {
-  //     field: 'notiReminders',
-  //     headerName: 'Reminder Notifications',
-  //     description: 'desc',
-  //     sortable: false,
-  //     width: 200,
-  //   },
-  // ];
 
   useEffect(() => {
     async function getData() {
@@ -350,7 +309,7 @@ function Schedules() {
               break;
 
             default:
-              console.log('generic switch behaviour');
+              showSnack('Recieved an unexpected response from API', 'error');
           }
         });
       } catch (e) {
@@ -523,15 +482,34 @@ function Schedules() {
 
       {/* Modify schedule section */}
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        {loadingScheduleData ? (
-          <h2>Existing schedules &#40;?&#41; </h2>
-        ) : (
-          <h2>
-            Existing schedules &#40;
-            {scheduleData.docCount}
-            &#41;
-          </h2>
-        )}
+        <Grid
+          justifyContent="space-between"
+          container
+        >
+          <Grid item>
+            {loadingScheduleData ? (
+              <h2>Existing Schedules &#40;?&#41; </h2>
+            ) : (
+              <h2>
+                Existing Schedules &#40;
+                {scheduleData.docCount}
+                &#41;
+              </h2>
+            )}
+          </Grid>
+
+          <Grid item>
+            <Button
+              variant="outlined"
+              startIcon={<Delete />}
+              color="error"
+              onClick={deleteSchedules}
+              sx={{ marginBottom: '24px' }}
+            >
+              Delete all Schedules
+            </Button>
+          </Grid>
+        </Grid>
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
@@ -551,12 +529,13 @@ function Schedules() {
               ) : (
                 scheduleData.schedules.map((row) => (
                   <TableRow key={row._id}>
+                    <TableCell>{row._id}</TableCell>
                     <TableCell component="th" scope="row">
-                      {format(new Date(row.scanStart), 'MM/dd/yyyy HH:mm')}
+                      {format(new Date(row.scanStart), 'dd/MM/yyyy HH:mm')}
                     </TableCell>
                     <TableCell>
                       {row.toolSelection.map((tool) => (
-                        <li key={tool.id}>{`${tool.toolName} - ${tool.description}`}</li>
+                        <li key={tool.id}>{tool.toolName}</li>
                       ))}
                     </TableCell>
                     <TableCell>{row.frequency}</TableCell>
@@ -577,15 +556,6 @@ function Schedules() {
           rowsPerPageOptions={[5]}
           getRowId={(row) => row._id} // eslint-disable-line no-underscore-dangle
         /> */}
-
-        <Button
-          variant="outlined"
-          startIcon={<Delete />}
-          color="error"
-          onClick={deleteSchedules}
-        >
-          Delete all Schedules
-        </Button>
       </Grid>
       {/*  */}
     </Grid>
