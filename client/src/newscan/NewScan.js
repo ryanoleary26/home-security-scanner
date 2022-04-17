@@ -106,35 +106,34 @@ function NewScan() {
     setError({ ...defaultErrors });
   };
 
-  // const toolValidator = (tools) => {
-  //   console.log('       In toolValidator');
-  //   if (tools.length === 0) {
-  //     console.log('           ⚠️Tool Selection invalid');
-  //     setError((prevError) => ({
-  //       ...prevError,
-  //       toolSelection: true,
-  //     }));
-  //     return false;
-  //   } else {
-  //     console.log('           ✅ all good here chief');
-  //     return true;
-  //   }
-  // };
-
-  // const intensityValidator = (inten) => {
-  //   console.log('       In intensityValidator');
-  //   if (inten.length === 0) {
-  //     console.log('           ⚠️Intensity invalid');
-  //     setError((prevError) => ({
-  //       ...prevError,
-  //       intensity: true,
-  //     }));
-  //     return false;
-  //   } else {
-  //     console.log('           ✅ all good here chief');
-  //     return true;
-  //   }
-  // };
+  const [loadingScanData, setLoadingScanData] = useState(true);
+  const [scanData, setScanData] = useState([]);
+  const columns = useMemo(() => [
+    {
+      Header: 'Scan ID',
+      id: 1,
+    },
+    {
+      Header: 'Scan Date/Time',
+      id: 2,
+    },
+    {
+      Header: 'Tool Selection',
+      id: 3,
+    },
+    {
+      Header: 'Scan Intensity',
+      id: 4,
+    },
+    {
+      Header: 'Complete/Failed Notifications',
+      id: 5,
+    },
+    {
+      Header: 'Reminder Notifications',
+      id: 6,
+    },
+  ]);
 
   const validateState = () => {
     // console.log('👉 Inside validateState()');
@@ -167,7 +166,7 @@ function NewScan() {
     if (validateState() === false) {
       // console.log('❌ validateState() returned false');
       // show error notification?
-      showSnack('An error occured', 'error');
+      showSnack('The form contains invalid data. Please check your selections, and try again.', 'error');
     } else {
       // console.log('✅ all good here chief');
       // show success notification
@@ -188,6 +187,8 @@ function NewScan() {
               `Succesfuly submitted! ${response.data.message} `,
               'success',
             );
+            setLoadingScanData(true);
+            clearForm();
           } else {
             showSnack(`An error occured ${response.status}`, 'error');
           }
@@ -195,7 +196,6 @@ function NewScan() {
       } catch (e) {
         showSnack(`An error occured ${e}`, 'error');
       }
-      clearForm();
     }
   };
 
@@ -230,36 +230,6 @@ function NewScan() {
     }));
   };
 
-  // ====================================
-  const [loadingScanData, setLoadingScanData] = useState(true);
-  const [scanData, setScanData] = useState([]);
-  const columns = useMemo(() => [
-    {
-      Header: 'Scan ID',
-      id: 1,
-    },
-    {
-      Header: 'Scan Date/Time',
-      id: 2,
-    },
-    {
-      Header: 'Tool Selection',
-      id: 3,
-    },
-    {
-      Header: 'Scan Intensity',
-      id: 4,
-    },
-    {
-      Header: 'Complete/Failed Notifications',
-      id: 5,
-    },
-    {
-      Header: 'Reminder Notifications',
-      id: 6,
-    },
-  ]);
-
   useEffect(() => {
     async function getData() {
       try {
@@ -286,7 +256,7 @@ function NewScan() {
     if (loadingScanData) {
       getData();
     }
-  }, []);
+  }, [loadingScanData]);
 
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
