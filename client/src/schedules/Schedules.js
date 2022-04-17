@@ -161,6 +161,39 @@ function Schedules() {
     });
   };
 
+  const [loadingScheduleData, setLoadingScheduleData] = useState(true);
+  const [scheduleData, setScheduleData] = useState([]);
+  const columns = useMemo(() => [
+    {
+      Header: 'Schedule ID',
+      id: 1,
+    },
+    {
+      Header: 'Start Date/Time',
+      id: 2,
+    },
+    {
+      Header: 'Tool Selection',
+      id: 3,
+    },
+    {
+      Header: 'Scan Frequency',
+      id: 4,
+    },
+    {
+      Header: 'Scan Intensity',
+      id: 5,
+    },
+    {
+      Header: 'Complete/Failed Notifications',
+      id: 6,
+    },
+    {
+      Header: 'Reminder Notifications',
+      id: 7,
+    },
+  ]);
+
   const validateState = () => {
     // console.log('👉 Inside validateState()');
     let isScheduleValid = true;
@@ -209,7 +242,7 @@ function Schedules() {
       // console.log('❌ validateState() returned false');
       // show error notification?
       // console.log(error);
-      showSnack('An error occured', 'error');
+      showSnack('The form contains invalid data. Please check your selections, and try again.', 'error');
     } else {
       // console.log('✅ all good here chief');
       // show success notification
@@ -231,6 +264,8 @@ function Schedules() {
               `Succesfuly submitted! ${response.data.message} `,
               'success',
             );
+            setLoadingScheduleData(true);
+            clearForm();
           } else {
             showSnack(`An error occured ${response.status}`, 'error');
           }
@@ -238,7 +273,6 @@ function Schedules() {
       } catch (e) {
         showSnack(`An error occured ${e}`, 'error');
       }
-      clearForm();
     }
   };
 
@@ -259,39 +293,6 @@ function Schedules() {
       showSnack(`An error occured ${e}`, 'error');
     }
   };
-
-  const [loadingScheduleData, setLoadingScheduleData] = useState(true);
-  const [scheduleData, setScheduleData] = useState([]);
-  const columns = useMemo(() => [
-    {
-      Header: 'Schedule ID',
-      id: 1,
-    },
-    {
-      Header: 'Start Date/Time',
-      id: 2,
-    },
-    {
-      Header: 'Tool Selection',
-      id: 3,
-    },
-    {
-      Header: 'Scan Frequency',
-      id: 4,
-    },
-    {
-      Header: 'Scan Intensity',
-      id: 5,
-    },
-    {
-      Header: 'Complete/Failed Notifications',
-      id: 6,
-    },
-    {
-      Header: 'Reminder Notifications',
-      id: 7,
-    },
-  ]);
 
   useEffect(() => {
     async function getData() {
@@ -319,7 +320,7 @@ function Schedules() {
     if (loadingScheduleData) {
       getData();
     }
-  }, []);
+  }, [loadingScheduleData]);
 
   return (
     <Grid container spacing={2} sx={{ paddingBottom: 30 }}>
