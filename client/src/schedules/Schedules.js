@@ -163,6 +163,11 @@ function Schedules() {
 
   const [loadingScheduleData, setLoadingScheduleData] = useState(true);
   const [scheduleData, setScheduleData] = useState([]);
+  const [scheduleError, setScheduleError] = useState({
+    error: false,
+    message: '',
+  });
+
   const columns = useMemo(() => [
     {
       Header: 'Schedule ID',
@@ -257,7 +262,7 @@ function Schedules() {
       //   intensity: schedule.intensity,
       // };
       try {
-        axios.post('/schedule/newSchedule', schedule).then((response) => {
+        axios.post('/schedule/newSchedule', schedule, { timeout: 20000 }).then((response) => {
         // console.log(`Received response ${response.status}`);
           if (response.status === 200) {
             showSnack(
@@ -270,8 +275,8 @@ function Schedules() {
             showSnack(`An error occured ${response.status}`, 'error');
           }
         });
-      } catch (e) {
-        showSnack(`An error occured ${e}`, 'error');
+      } catch (err) {
+        showSnack(`${err}`, 'error');
       }
     }
   };
@@ -297,7 +302,7 @@ function Schedules() {
   useEffect(() => {
     async function getData() {
       try {
-        await axios.get('/schedule/getSchedules').then((response) => {
+        await axios.get('/schedule/getSchedules', { timeout: 20000 }).then((response) => {
           switch (response.status) {
             case 200:
               // console.log(response.data.schedules);
@@ -306,15 +311,16 @@ function Schedules() {
               break;
 
             case 204:
-              showSnack('There are no schedule records to show', 'info');
+              setScheduleError({ error: true, message: 'No records.' });
               break;
 
             default:
               showSnack('Recieved an unexpected response from API', 'error');
           }
         });
-      } catch (e) {
-        showSnack(`Could not reach API. \n${e} `, 'error');
+      } catch (err) {
+        setScheduleError({ error: true, message: `${err}` });
+        showSnack(`${err} `, 'error');
       }
     }
     if (loadingScheduleData) {
@@ -523,8 +529,9 @@ function Schedules() {
             <TableBody>
               {loadingScheduleData ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    <CircularProgress />
+                  <TableCell colSpan={columns.length} align="center">
+                    {scheduleError.error ? <p>{scheduleError.message}</p> : <CircularProgress />}
+                    {/* <CircularProgress /> */}
                   </TableCell>
                 </TableRow>
               ) : (

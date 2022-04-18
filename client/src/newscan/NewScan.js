@@ -108,6 +108,11 @@ function NewScan() {
 
   const [loadingScanData, setLoadingScanData] = useState(true);
   const [scanData, setScanData] = useState([]);
+  const [scanError, setScanError] = useState({
+    error: false,
+    message: '',
+  });
+
   const columns = useMemo(() => [
     {
       Header: 'Scan ID',
@@ -180,7 +185,7 @@ function NewScan() {
         scanDate: new Date(),
       };
       try {
-        axios.post('/scan/newScan', newScanData).then((response) => {
+        axios.post('/scan/newScan', newScanData, { timeout: 20000 }).then((response) => {
           // console.log(`Received response ${response.status}`);
           if (response.status === 200) {
             showSnack(
@@ -194,7 +199,7 @@ function NewScan() {
           }
         });
       } catch (e) {
-        showSnack(`An error occured ${e}`, 'error');
+        showSnack(` ${e}`, 'error');
       }
     }
   };
@@ -233,24 +238,22 @@ function NewScan() {
   useEffect(() => {
     async function getData() {
       try {
-        await axios.get('/scan/getScans').then((response) => {
+        await axios.get('/scan/getScans', { timeout: 20000 }).then((response) => {
           switch (response.status) {
             case 200:
-              // console.log(response.data.schedules);
               setScanData(response.data);
               setLoadingScanData(false);
               break;
-
             case 204:
-              showSnack('There are no scan records to show', 'info');
+              setScanError({ error: true, message: 'No records.' });
               break;
-
             default:
               showSnack('Recieved an unexpected response from API', 'error');
           }
         });
-      } catch (e) {
-        showSnack(`Could not reach API. \n${e} `, 'error');
+      } catch (err) {
+        setScanError({ error: true, message: `${err}` });
+        showSnack(`${err} `, 'error');
       }
     }
     if (loadingScanData) {
@@ -402,7 +405,8 @@ function NewScan() {
               {loadingScanData ? (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    <CircularProgress />
+                    {scanError.error ? <p>{scanError.message}</p> : <CircularProgress />}
+                    {/* <CircularProgress /> */}
                   </TableCell>
                 </TableRow>
               ) : (
