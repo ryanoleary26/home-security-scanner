@@ -1,46 +1,22 @@
 {
+    "root": true,
     "env": {
+        "node": true,
         "browser": true,
+        "commonjs": true,
         "es2021": true
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended",
-        "airbnb"
+        "plugin:react/recommended"
     ],
     "parserOptions": {
         "ecmaFeatures": {
             "jsx": true
         },
-        "ecmaVersion": "latest",
-        "sourceType": "module"
+        "ecmaVersion": "latest"
     },
-    "plugins": [
-        "react"
-    ],
     "rules": {
-        "react/jsx-filename-extension": [
-            1,
-            {
-                "extensions": [
-                    ".js",
-                    ".jsx"
-                ]
-            }
-        ],
-        "import/prefer-default-export": 0,
-        "react/jsx-uses-vars": "error",
-        "react/jsx-wrap-multilines": "off"
-    },
-    "overrides": [
-        {
-            "files": [
-                "**/*.test.js",
-                "**/*.test.jsx"
-            ],
-            "env": {
-                "jest": true
-            }
-        }
-    ]
+        "linebreak-style": 0
+    }
 }

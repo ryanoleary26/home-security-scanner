@@ -1,3 +1,6 @@
+/* eslint-disable react/jsx-props-no-spreading */
+
+// import React from 'react';
 import React from 'react';
 
 // Style
@@ -81,6 +84,7 @@ function Home() {
           </TableContainer>
         </section>
       </Grid>
+
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <section id="newscan">
           <h1>New Scan</h1>
@@ -103,6 +107,7 @@ function Home() {
             variant="contained"
             startIcon={<CalendarIcon />}
             href="/schedules"
+            disabled
           >
             New Schedule
           </Button>
@@ -119,6 +124,7 @@ function Home() {
             variant="contained"
             startIcon={<CalendarIcon />}
             href="/schedules#modify"
+            disabled
           >
             Modify Schedule
           </Button>
