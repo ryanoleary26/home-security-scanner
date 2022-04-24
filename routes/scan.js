@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { MongoClient } = require('mongodb');
+const axios = require('axios');
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
@@ -94,6 +95,12 @@ router.post('/newScan', validateEmpty, async function (req, res) {
       // console.log(
       //   `A scan document was inserted with the _id: ${response.insertedId}`,
       // );
+      if (response.acknowledged === false) {
+        res.status(500).send({
+          message: 'Database Internal Server Error',
+          description: 'There was an error while writing your request to the database. Please try again.'
+        })
+      }
       res.status(200).send({
         message: `A scan document was inserted with the _id: ${response.insertedId}`,
       });
@@ -105,7 +112,6 @@ router.post('/newScan', validateEmpty, async function (req, res) {
       error: err,
     });
   }
-  
 });
 
 router.get('/getScans', async function (req, res) {

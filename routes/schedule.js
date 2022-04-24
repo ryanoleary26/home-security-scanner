@@ -97,9 +97,15 @@ router.post('/newSchedule', validateEmpty, async function (req, res) {
       const collection = database.collection('schedules');
       const doc = req.body;
       const response = await collection.insertOne(doc);
-      console.log(
-        `A schedule document was inserted with the _id: ${response.insertedId}`,
-      );
+      // console.log(
+      //   `A schedule document was inserted with the _id: ${response.insertedId}`,
+      // );
+      if (response.acknowledged === false) {
+        res.status(500).send({
+          message: 'Database Internal Server Error',
+          description: 'There was an error while writing your request to the database. Please try again.'
+        })
+      }
       res.status(200).send({
         message: `A schedule document was inserted with the _id: ${response.insertedId}`,
       });
