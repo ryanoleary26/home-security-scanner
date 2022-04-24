@@ -84,20 +84,28 @@ const validateEmpty = (req, res, next) => {
 };
 
 router.post('/newScan', validateEmpty, async function (req, res) {
-  if (!res.headersSent) {
-    await client.connect();
-    const database = client.db('homesec');
-    const collection = database.collection('scans');
-    const doc = req.body;
-    const response = await collection.insertOne(doc);
-    console.log(
-      `A scan document was inserted with the _id: ${response.insertedId}`,
-    );
-    res.status(200).send({
-      message: `A scan document was inserted with the _id: ${response.insertedId}`,
+  try {
+    if (!res.headersSent) {
+      await client.connect();
+      const database = client.db('homesec');
+      const collection = database.collection('scans');
+      const doc = req.body;
+      const response = await collection.insertOne(doc);
+      // console.log(
+      //   `A scan document was inserted with the _id: ${response.insertedId}`,
+      // );
+      res.status(200).send({
+        message: `A scan document was inserted with the _id: ${response.insertedId}`,
+      });
+      await client.close();
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: 'Internal Server Error',
+      error: err,
     });
-    await client.close();
   }
+  
 });
 
 router.get('/getScans', async function (req, res) {
