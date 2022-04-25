@@ -101,17 +101,20 @@ router.post('/newSchedule', validateEmpty, async function (req, res) {
       //   `A schedule document was inserted with the _id: ${response.insertedId}`,
       // );
       if (response.acknowledged === false) {
+        await client.close();
         res.status(500).send({
           message: 'Database Internal Server Error',
           description: 'There was an error while writing your request to the database. Please try again.'
         })
+      } else {
+        await client.close();
+        res.status(200).send({
+          message: `A schedule document was inserted with the _id: ${response.insertedId}`,
+        });
       }
-      res.status(200).send({
-        message: `A schedule document was inserted with the _id: ${response.insertedId}`,
-      });
-      await client.close();
     }
   } catch (err) {
+    await client.close();
     res.status(500).send({
       message: 'Internal Server Error',
       error: err,
@@ -127,13 +130,15 @@ router.get('/getSchedules', async function (req, res) {
     const collection = database.collection('schedules');
     const docCount = await collection.countDocuments();
     if (docCount === 0) {
+      await client.close();
       res.status(204).send(); //empty object to return
     } else {
+      await client.close();
       const schedules = await collection.find({}).toArray();
       res.status(200).send({ schedules: schedules, docCount });
     }
-    await client.close();
   } catch (err) {
+    await client.close();
     res.status(500).send({
       message: 'Internal Server Error',
       error: err,
@@ -159,10 +164,11 @@ router.post('/deleteSchedules', async function (req, res) {
         deletedDocuments: deleteManyResult.deletedCount,
       });
     }
-  } catch (e) {
+  } catch (err) {
+    await client.close();
     res.status(500).send({
       message: 'Internal Server Error',
-      error: e,
+      error: err,
     });
   }
 });
