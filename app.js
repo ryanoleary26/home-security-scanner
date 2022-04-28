@@ -6,6 +6,7 @@ const cors = require('cors');
 
 const scanRouter = require('./routes/scan');
 const scheduleRouter = require('./routes/schedule');
+const reportRouter = require('./routes/report');
 
 app = express();
 
@@ -17,7 +18,7 @@ app.use(cors());
 // app.use('/', indexRouter);
 app.use('/scan', scanRouter);
 app.use('/schedule', scheduleRouter);
-
+app.use('/report', reportRouter);
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
