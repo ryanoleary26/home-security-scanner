@@ -132,7 +132,7 @@ function ReportTemplate() {
 
 function Report(props) {
   const data = props.data.response;
-  console.log(data);
+  // console.log(data);
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
