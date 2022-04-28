@@ -1,3 +1,4 @@
+/* eslint max-len: ["error", { "code": 120 }] */
 import {
   React,
   useState,
@@ -25,6 +26,7 @@ import {
   Checkbox,
   Button,
   ButtonGroup,
+  IconButton,
   Select,
   Stack,
   MenuItem,
@@ -37,11 +39,86 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  TableFooter,
+  TablePagination,
   TableRow,
   Paper,
   CircularProgress,
+  Backdrop,
 } from '@mui/material';
+import PropTypes from 'prop-types';
+import { useTheme } from '@mui/material/styles';
+import LastPageIcon from '@mui/icons-material/LastPage';
+import FirstPageIcon from '@mui/icons-material/FirstPage';
+import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { RotateLeft, Send } from '@mui/icons-material';
+
+function TablePaginationActions(props) {
+  const theme = useTheme();
+  const {
+    count,
+    page,
+    rowsPerPage,
+    onPageChange,
+  } = props;
+
+  const handleFirstPageButtonClick = (event) => {
+    onPageChange(event, 0);
+  };
+
+  const handleBackButtonClick = (event) => {
+    onPageChange(event, page - 1);
+  };
+
+  const handleNextButtonClick = (event) => {
+    onPageChange(event, page + 1);
+  };
+
+  const handleLastPageButtonClick = (event) => {
+    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+  };
+
+  return (
+    <Box sx={{ flexShrink: 0, ml: 2.5 }}>
+      <IconButton
+        onClick={handleFirstPageButtonClick}
+        disabled={page === 0}
+        aria-label="first page"
+      >
+        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+      </IconButton>
+      <IconButton
+        onClick={handleBackButtonClick}
+        disabled={page === 0}
+        aria-label="previous page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+      </IconButton>
+      <IconButton
+        onClick={handleNextButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="next page"
+      >
+        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+      </IconButton>
+      <IconButton
+        onClick={handleLastPageButtonClick}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        aria-label="last page"
+      >
+        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+      </IconButton>
+    </Box>
+  );
+}
+
+TablePaginationActions.propTypes = {
+  count: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+};
 
 function NewScan() {
   const [snackState, setSnackState] = useState({
@@ -164,6 +241,15 @@ function NewScan() {
     return isValid;
   };
 
+  const [backdropState, setBackdropState] = useState(false);
+
+  // const handleBackdrop = () => {
+  //   setBackdropState(false);
+  // }
+  // const handleBackdropToggle = () => {
+  //   setBackdropState(!backdropState);
+  // }
+
   const submit = () => {
     clearErrors();
     if (validateState() === false) {
@@ -178,6 +264,7 @@ function NewScan() {
         scanDate: new Date(),
       };
       try {
+        setBackdropState(true);
         axios.post('/scan/newScan', newScanData, { timeout: 1200000 }).then((response) => { // timeout of 20 mins
           if (response.status === 200) {
             showSnack(
@@ -185,13 +272,16 @@ function NewScan() {
               'success',
             );
             setLoadingScanData(true);
+            setBackdropState(false);
             clearForm();
           } else {
             showSnack(`An error occured ${response.status}`, 'error');
+            setBackdropState(false);
           }
         });
       } catch (e) {
         showSnack(` ${e}`, 'error');
+        setBackdropState(false);
       }
     }
   };
@@ -216,7 +306,7 @@ function NewScan() {
   // TODO Replace with database interaction
   const toolRows = [
     { id: 1, toolName: 'nmap', description: 'Network mapper tool' },
-    { id: 2, toolName: 'masscan', description: 'Scan larger networks' },
+    // { id: 2, toolName: 'masscan', description: 'Scan larger networks' },
   ];
 
   const handleToolChange = (selectedTools) => {
@@ -252,6 +342,20 @@ function NewScan() {
       getData();
     }
   }, [loadingScanData]);
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - scanData.scans.length) : 0; //eslint-disable-line spaced-comment, max-len
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
@@ -402,7 +506,11 @@ function NewScan() {
                   </TableCell>
                 </TableRow>
               ) : (
-                scanData.scans.map((row) => (
+                // scanData.scans.map((row) => (
+                (rowsPerPage > 0
+                  ? scanData.scans.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).reverse()
+                  : scanData.scans.reverse()
+                ).map((row) => (
                   <TableRow key={row._id}>
                     <TableCell>{row._id}</TableCell>
                     <TableCell>{format(new Date(row.scanDate), 'dd/MM/yyyy HH:mm')}</TableCell>
@@ -417,10 +525,38 @@ function NewScan() {
                   </TableRow>
                 ))
               )}
+              {emptyRows > 0 && (
+                <TableRow style={{ height: 53 * emptyRows }}>
+                  <TableCell colSpan={6} />
+                </TableRow>
+              )}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  colSpan={5}
+                  count={scanData.scans ? scanData.scans.length : 0}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  SelectProps={{
+                    inputProps: {
+                      'aria-label': 'rows per page',
+                    },
+                    native: true,
+                  }}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  ActionsComponent={TablePaginationActions}
+                />
+              </TableRow>
+            </TableFooter>
           </Table>
         </TableContainer>
       </Grid>
+      <Backdrop open={backdropState}>
+        <CircularProgress />
+      </Backdrop>
       {/*  */}
     </Grid>
   );
