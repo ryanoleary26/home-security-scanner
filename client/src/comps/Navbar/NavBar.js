@@ -18,10 +18,10 @@ export default function NavBar() {
         <NavLink className="navitem" to="/newscan">
           New Scan
         </NavLink>
-        <NavLink className="navitem" to="/schedules">
+        {/* <NavLink className="navitem" to="/schedules">
           Scan Schedules
-        </NavLink>
-        <NavLink className="navitem" to="/results">
+        </NavLink> */}
+        <NavLink className="navitem" to="/report">
           Scan Results
         </NavLink>
       </Stack>
