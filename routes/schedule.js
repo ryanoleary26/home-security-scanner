@@ -120,7 +120,7 @@ router.post('/newSchedule', validateEmpty, async function (req, res) {
       error: err,
     });
   }
-  
+
 });
 
 router.get('/getSchedules', async function (req, res) {
@@ -133,15 +133,15 @@ router.get('/getSchedules', async function (req, res) {
       await client.close();
       res.status(204).send(); //empty object to return
     } else {
-      await client.close();
       const schedules = await collection.find({}).toArray();
+      await client.close();
       res.status(200).send({ schedules: schedules, docCount });
     }
   } catch (err) {
     await client.close();
     res.status(500).send({
       message: 'Internal Server Error',
-      error: err,
+      error: err.message,
     });
   }
 });

@@ -89,26 +89,33 @@ const validateEmpty = (req, res, next) => {
 async function runNmap(scanInfo) {
   return new Promise(async (resolve, reject) => {
     // --version-intensity setting for nmap
-    // let scanIntensity;
-    // switch (scanInfo.intensity) {
-    //   case "Intense":
-    //     scanIntensity = 9;
-    //     break;
-    //   case "Moderate":
-    //     scanIntensity = 7;
-    //   case "Light":
-    //     scanIntensity = 2;
-    //   default:
-    //     break;
-    // }
-    console.log(`Starting scan id ${scanInfo._id} at ${new Date()}`);
+    let scanIntensity;
+    switch (scanInfo.intensity) {
+      case "Intense":
+        scanIntensity = 9;
+        break;
+      case "Moderate":
+        scanIntensity = 7;
+        break;
+      case "Light":
+        scanIntensity = 2;
+        break;
+      // default option remains 7 See: --version-intensity https://nmap.org/book/man-version-detection.html
+      default:
+        scanIntensity = 7;
+    }
+    // console.log(`Generating report for ScanID ${scanInfo._id} at ${new Date()}`);
+
     // set scan options and target
     const scan = new NmapScan({
-      target: '192.168.0.1',
+      target: '192.168.0.0/24',
+      script: 'vuln',
+      intensity: scanIntensity
     });
     // await scan result
     const result = await scan.run();
-    console.log(`Ending scan id ${scanInfo._id} at ${new Date()}`);
+
+    // console.log(`Report for ScanID ${scanInfo._id} generated at ${new Date()}`);
     // handle promise result
     if (result !== {} || result !== undefined) {
       resolve(result);
@@ -140,38 +147,11 @@ router.post('/newScan', validateEmpty, async function (req, res) {
       //
       const toolInfo = scan.toolSelection;
       let scanResult;
-      // console.log("Starting scan")
-      // scanResult = await runNmap(scan);
-      // console.log("Scan complete")
-      // console.log(scanResult);
-
-      // toolInfo.forEach(async (tool) => {
-      //   if (tool.toolName === 'nmap') {
-      //     console.log('Launching nmap scan')
-      //     scanResult = await runNmap(scan);
-      //   } //else if (tool.toolName === 'masscan') {
-      //   //   const scanResult = runMasscan(scanInfo);
-      //   // }
-      // });
-
       for (let index = 0; index < toolInfo.length; index++) {
         if (toolInfo[index].toolName === 'nmap') {
-          console.log('Launching nmap scan')
           scanResult = await runNmap(scan);
-          console.log('Scan complete')
         }
       }
-
-      // axios.post('http://127.0.0.1:3001/report/newReport', doc).then((response) => {
-      //   // console.log(`Received response ${response.status}`);
-      //   if (response.status === 200) {
-      //     console.log(response.data.scanResult)
-      //   } else if (response.status === 500) {
-      //     res.status(500).send('Internal Server Error from /report/newReport')
-      //   }
-      // });
-
-      //
 
       if (scanResult === undefined || scanResult.length === {}) {
         await client.close();
@@ -180,11 +160,22 @@ router.post('/newScan', validateEmpty, async function (req, res) {
             'Something went wrong when trying to complete the network scan. Got an undefined or empty response from scanner()',
         });
       } else {
-        await client.close();
-        res.status(200).send({
-          message: `Scan was completed and inserted with the _id: ${response.insertedId}`,
-          report: scanResult,
-        });
+        scanResult.scanID = response.insertedId;
+        const collection_scans = database.collection('reports');
+        const response_scan = await collection_scans.insertOne(scanResult);
+        if (response_scan.acknowledged === false) {
+          await client.close();
+          res.status(500).send({
+            message: 'Database Internal Server Error',
+            description:
+              'There was an error while writing the scan report to the database. Please try again.',
+          });
+        } else {
+          res.status(200).send({
+            message: `Scan was completed and inserted with the _id: ${response.insertedId}`,
+            report: scanResult,
+          });
+        }
       }
     }
   } catch (err) {

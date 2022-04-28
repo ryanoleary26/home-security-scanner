@@ -166,17 +166,10 @@ function NewScan() {
 
   const submit = () => {
     clearErrors();
-    // console.clear();
-    // console.log('📞Calling validateState()');
     if (validateState() === false) {
-      // console.log('❌ validateState() returned false');
-      // show error notification?
       showSnack('The form contains invalid data. Please check your selections, and try again.', 'error');
     } else {
-      // console.log('✅ all good here chief');
-      // show success notification
       clearErrors();
-      // console.log(`Sending ${JSON.stringify(scan, null, 4)}`);
       const newScanData = {
         notiComplete: scan.notiComplete,
         notiReminders: scan.notiReminders,
@@ -185,8 +178,7 @@ function NewScan() {
         scanDate: new Date(),
       };
       try {
-        axios.post('/scan/newScan', newScanData, { timeout: 20000 }).then((response) => {
-          // console.log(`Received response ${response.status}`);
+        axios.post('/scan/newScan', newScanData, { timeout: 1200000 }).then((response) => { // timeout of 20 mins
           if (response.status === 200) {
             showSnack(
               `Succesfuly submitted! ${response.data.message} `,
