@@ -37,7 +37,9 @@
         "react/jsx-one-expression-per-line": "off",
         "react/prop-types": "off",
         "react/destructuring-assignment": "off",
-        "prefer-destructuring": "off"
+        "prefer-destructuring": "off",
+        "react/jsx-indent": "off",
+        "max-len": "off"
     },
     "overrides": [
         {
