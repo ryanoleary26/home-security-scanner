@@ -19,11 +19,18 @@ import {
   Alert,
   CircularProgress,
   Button,
+  Paper,
+  Table,
+  TableBody,
+  TableRow,
+  TableCell,
+  Stack,
 } from '@mui/material';
 import { millisecondsToMinutes } from 'date-fns';
 
 // Icons
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 function ReportTemplate() {
   const [loadingReportData, setLoadingReportData] = useState(true);
@@ -90,15 +97,22 @@ function ReportTemplate() {
   }, [loadingReportData]);
 
   return (
-    <Grid container sx={{ paddingBottom: 30 }}>
+    <Grid container sx={{ marginBottom: 30 }}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
         <section>
-          <Button variant="outlined" startIcon={<ArrowBackOutlinedIcon />} href="/report">
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackOutlinedIcon />}
+            href="/report"
+            sx={{ marginBottom: 2 }}
+          >
             Back
           </Button>
           <h1>
             Report ID: {reportID}
           </h1>
+        </section>
+        <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
           {loadingReportData ? (
             // waiting for data to load
             <div>
@@ -106,9 +120,23 @@ function ReportTemplate() {
             </div>
           ) : (
             // data has loaded
-            <Report data={reportData} />
+            <>
+              <Report data={reportData} />
+              <div>
+                <Stack sx={{ justifyContent: 'center' }}>
+                  <KeyboardArrowUpIcon sx={{ alignSelf: 'center' }} fontSize="large" />
+                  <Button
+                    variant="contained"
+                    sx={{ alignSelf: 'center' }}
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  >
+                    Scroll to the top
+                  </Button>
+                </Stack>
+              </div>
+            </>
           )}
-        </section>
+        </Grid>
       </Grid>
 
       <Snackbar
@@ -134,37 +162,95 @@ function Report(props) {
   const data = props.data.response;
   // console.log(data);
   return (
-    <Grid container sx={{ paddingBottom: 30 }}>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+    <Grid container spacing={4} sx={{ paddingBottom: 5 }}>
+      <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
         <h2>Quick Summary</h2>
-        <p>Nmap version: {data.version.toString()}</p>
-        <p>Scan start date and time: {data.timestamp.toString()}</p>
-        <p>Scan duration: {millisecondsToMinutes(data.duration)} minutes</p>
-        <p>Hosts discovered: {data.hosts.length}</p>
-        <p>Nmap scan arguments: {data.nmapArguments.toString()}</p>
-        <p>Scan ID: {data.scanID.toString()}</p>
       </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
+      <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+        <Table sx={{ '&:last-child tr': { backgroundColor: '#ffffff' } }}>
+          <TableBody>
+            <TableRow>
+              <TableCell variant="head">Nmap Version</TableCell>
+              <TableCell>{data.version.toString()}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head">Scan start time</TableCell>
+              <TableCell>{data.timestamp.toString()}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head">Scan duration</TableCell>
+              <TableCell>{millisecondsToMinutes(data.duration)} minutes</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head">Scan arguments</TableCell>
+              <TableCell>{data.nmapArguments.toString()}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head">Scan ID</TableCell>
+              <TableCell>{data.scanID.toString()}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell variant="head">Hosts discovered</TableCell>
+              <TableCell>{data.hosts.length}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Grid>
+
+      <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
         <h2>Host Summary</h2>
-        {data.hosts.map((host) => (
-          <div>
-            <hr />
-            <h3>Host Information</h3>
-            <p>IP Address: {host.ipAddress}</p>
-            <p>MAC Address: {host.mac}</p>
-            <p>Device Vendor: {host.vendor}</p>
-            <h3>Ports Identified</h3>
-            {host.ports.length !== 0 ? (host.ports.map((port) => (
-              <ul>
-                <li>{port.number}</li>
-                <li>{port.service}</li>
-                <li>{port.protocol}</li>
-              </ul>
-            ))) : (<p>No ports detected</p>)}
-            { }
-            {/* <p>{host.ports.length}</p> */}
-          </div>
-        ))}
+      </Grid>
+      <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+        <Grid container spacing={3}>
+          {data.hosts.map((host, index) => (
+            <Grid key={host.ipAddress} item xs={12} sm={12} md={12} lg={12} xl={12}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f5f5f5' }} elevation={3}>
+                <h3>Host #{index + 1}</h3>
+                <h5>Details</h5>
+                <Table sx={{ tr: { backgroundColor: '#ffffff' }, marginBottom: 5 }}>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell variant="head">IP Address</TableCell>
+                      <TableCell>{host.ipAddress ? host.ipAddress : 'Not available'}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell variant="head">MAC Address</TableCell>
+                      <TableCell>{host.mac ? host.mac : 'Not available'}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell variant="head">Device Vendor</TableCell>
+                      <TableCell>{host.vendor ? host.vendor : 'Not available'}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell rowSpan={host.ports.length !== 0 ? host.ports.length + 1 : 2} variant="head">Open/Identified Ports</TableCell>
+                    </TableRow>
+
+                    {host.ports.length !== 0 ? (host.ports.map((port) => (
+                      <TableRow key={port.number}>
+                        <TableCell>
+                          <p>Port number: {port.number}</p>
+                          <p>Service: {port.service}</p>
+                          <p>Protocol: {port.protocol}</p>
+                          <p><u>Vulnerability Data</u></p>
+                          {
+                            port.script !== undefined
+                              ? Object.keys(port.script).map((key) => <p>{port.script[key].id}: {port.script[key].output}</p>)
+                              : <p>No information available</p>
+                          }
+                          {/* Check if the port has a script attachment */}
+                        </TableCell>
+                      </TableRow>
+                    ))) : (
+                      <TableRow>
+                        <TableCell>No ports detected</TableCell>
+                      </TableRow>)}
+                  </TableBody>
+                </Table>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
       </Grid>
     </Grid>
   );
