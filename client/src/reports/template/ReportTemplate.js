@@ -235,7 +235,17 @@ function Report(props) {
                           <p><u>Vulnerability Data</u></p>
                           {
                             port.script !== undefined
-                              ? Object.keys(port.script).map((key) => <p>{port.script[key].id}: {port.script[key].output}</p>)
+                              ? (
+                                Object.keys(port.script).map((key) => {
+                                  let output;
+                                  if (port.script[key].id === undefined && port.script[key].output === undefined) {
+                                    output = <p key={key}> <a target="_blank" rel="noreferrer" href={`https://nmap.org/nsedoc/scripts/${port.script.id}.html`}>{port.script.id}</a> - {port.script.output.includes('ERROR') ? 'This script didn\'t execute' : port.script.output}</p>;
+                                  } else {
+                                    output = <p key={key}> <a target="_blank" rel="noreferrer" href={`https://nmap.org/nsedoc/scripts/${port.script[key].id}.html`}>{port.script[key].id}</a> - {port.script[key].output.includes('ERROR') ? 'This script didn\'t execute' : port.script[key].output}</p>;
+                                  }
+                                  return output;
+                                })
+                              )
                               : <p>No information available</p>
                           }
                           {/* Check if the port has a script attachment */}
