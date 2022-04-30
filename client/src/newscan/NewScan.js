@@ -278,6 +278,9 @@ function NewScan() {
             showSnack(`An error occured ${response.status}`, 'error');
             setBackdropState(false);
           }
+        }).catch((axiosError) => {
+          showSnack(` ${axiosError}`, 'error');
+          setBackdropState(false);
         });
       } catch (e) {
         showSnack(` ${e}`, 'error');
