@@ -26,7 +26,7 @@ import {
   TableCell,
   Stack,
 } from '@mui/material';
-import { millisecondsToMinutes } from 'date-fns';
+import { format, millisecondsToMinutes } from 'date-fns';
 
 // Icons
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
@@ -175,7 +175,8 @@ function Report(props) {
             </TableRow>
             <TableRow>
               <TableCell variant="head">Scan start time</TableCell>
-              <TableCell>{data.timestamp.toString()}</TableCell>
+              <TableCell>{format(new Date(data.timestamp), 'dd/MM/yyyy HH:mm')}</TableCell>
+
             </TableRow>
             <TableRow>
               <TableCell variant="head">Scan duration</TableCell>
