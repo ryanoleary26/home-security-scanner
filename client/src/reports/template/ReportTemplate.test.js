@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Results from './Results';
+import ReportTemplate from './ReportTemplate';
 
 test('renders results page', () => {
-  render(<Results />);
+  render(<ReportTemplate />);
   const linkElement = screen.getByText(/Scan Results/i);
   expect(linkElement).toBeInTheDocument();
 });

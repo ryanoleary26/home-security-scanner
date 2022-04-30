@@ -1,9 +1,12 @@
 var express = require('express');
 var router = express.Router();
 const { MongoClient } = require('mongodb');
+const axios = require('axios');
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
+
+const { NmapScan } = require('network-mapper');
 
 router.get('/', function (req, res) {
   res.sendStatus(405);
@@ -83,20 +86,104 @@ const validateEmpty = (req, res, next) => {
   next();
 };
 
-router.post('/newScan', validateEmpty, async function (req, res) {
-  if (!res.headersSent) {
-    await client.connect();
-    const database = client.db('homesec');
-    const collection = database.collection('scans');
-    const doc = req.body;
-    const response = await collection.insertOne(doc);
-    console.log(
-      `A scan document was inserted with the _id: ${response.insertedId}`,
-    );
-    res.status(200).send({
-      message: `A scan document was inserted with the _id: ${response.insertedId}`,
+async function runNmap(scanInfo) {
+  return new Promise(async (resolve, reject) => {
+    // --version-intensity setting for nmap
+    let scanIntensity;
+    switch (scanInfo.intensity) {
+      case "Intense":
+        scanIntensity = 9;
+        break;
+      case "Moderate":
+        scanIntensity = 7;
+        break;
+      case "Light":
+        scanIntensity = 2;
+        break;
+      // default option remains 7 See: --version-intensity https://nmap.org/book/man-version-detection.html
+      default:
+        scanIntensity = 7;
+    }
+    // console.log(`Generating report for ScanID ${scanInfo._id} at ${new Date()}`);
+
+    // set scan options and target
+    const scan = new NmapScan({
+      target: '192.168.0.0/24',
+      script: 'vuln',
+      intensity: scanIntensity
     });
+    // await scan result
+    const result = await scan.run();
+
+    // console.log(`Report for ScanID ${scanInfo._id} generated at ${new Date()}`);
+    // handle promise result
+    if (result !== {} || result !== undefined) {
+      resolve(result);
+    } else {
+      reject(new Error(`Error when running scan`));
+    }
+  });
+}
+
+router.post('/newScan', validateEmpty, async function (req, res) {
+  try {
+    if (!res.headersSent) {
+      await client.connect();
+      const database = client.db('homesec');
+      const collection = database.collection('scans');
+      const scan = req.body;
+      const response = await collection.insertOne(scan);
+
+      // Did MongoDB atlas complete the op successfully?
+      if (response.acknowledged === false) {
+        await client.close();
+        res.status(500).send({
+          message: 'Database Internal Server Error',
+          description:
+            'There was an error while writing your request to the database. Please try again.',
+        });
+      }
+
+      //
+      const toolInfo = scan.toolSelection;
+      let scanResult;
+      for (let index = 0; index < toolInfo.length; index++) {
+        if (toolInfo[index].toolName === 'nmap') {
+          scanResult = await runNmap(scan);
+        }
+      }
+
+      if (scanResult === undefined || scanResult.length === {}) {
+        await client.close();
+        res.status(500).send({
+          message:
+            'Something went wrong when trying to complete the network scan. Got an undefined or empty response from scanner()',
+        });
+      } else {
+        scanResult.scanID = response.insertedId;
+        const collection_scans = database.collection('reports');
+        const response_scan = await collection_scans.insertOne(scanResult);
+        if (response_scan.acknowledged === false) {
+          await client.close();
+          res.status(500).send({
+            message: 'Database Internal Server Error',
+            description:
+              'There was an error while writing the scan report to the database. Please try again.',
+          });
+        } else {
+          res.status(200).send({
+            message: `Scan was completed and inserted with the _id: ${response.insertedId}`,
+            report: scanResult,
+          });
+        }
+      }
+    }
+  } catch (err) {
     await client.close();
+    res.status(500).send({
+      message: 'Internal Server Error',
+      error: err.message,
+    });
   }
 });
 
@@ -107,13 +194,15 @@ router.get('/getScans', async function (req, res) {
     const collection = database.collection('scans');
     const docCount = await collection.countDocuments();
     if (docCount === 0) {
+      await client.close();
       res.status(204).send(); //empty object to return
     } else {
       const scans = await collection.find({}).toArray();
+      await client.close();
       res.status(200).send({ scans, docCount });
     }
-    await client.close();
   } catch (err) {
+    await client.close();
     res.status(500).send({
       message: 'Internal Server Error',
       error: err,
@@ -128,18 +217,21 @@ router.post('/deleteScans', async function (req, res) {
     const collection = database.collection('scans');
     const docCount = await collection.countDocuments();
     if (docCount === 0) {
+      await client.close();
       res.status(200).send({
         message: 'There are no documents to delete.',
         documentsDeleted: 0,
       });
     } else {
       const deleteManyResult = await collection.deleteMany({});
+      await client.close();
       res.status(200).send({
         message: `Deleted ${deleteManyResult.deletedCount} documents`,
         deletedDocuments: deleteManyResult.deletedCount,
       });
     }
   } catch (err) {
+    await client.close();
     res.status(500).send({
       message: 'Internal Server Error',
       error: err,

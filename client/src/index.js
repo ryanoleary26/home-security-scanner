@@ -4,7 +4,8 @@ import ReactDOM from 'react-dom';
 // Pages
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './home/Home';
-import Results from './results/Results';
+import Report from './reports/Reports';
+import ReportTemplate from './reports/template/ReportTemplate';
 import NewScan from './newscan/NewScan';
 import Schedules from './schedules/Schedules';
 import ErrorPage from './errorpage/ErrorPage';
@@ -28,9 +29,10 @@ ReactDOM.render(
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/results" element={<Results />} />
+        <Route path="/report" element={<Report />} />
         <Route path="/newscan" element={<NewScan />} />
         <Route path="/schedules" element={<Schedules />} />
+        <Route path="/report/id/*" element={<ReportTemplate />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
     </Router>

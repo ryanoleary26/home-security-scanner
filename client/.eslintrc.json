@@ -33,7 +33,13 @@
         "react/jsx-uses-vars": "error",
         "react/jsx-wrap-multilines": "off",
         "no-underscore-dangle": "off",
-        "linebreak-style": 0
+        "linebreak-style": 0,
+        "react/jsx-one-expression-per-line": "off",
+        "react/prop-types": "off",
+        "react/destructuring-assignment": "off",
+        "prefer-destructuring": "off",
+        "react/jsx-indent": "off",
+        "max-len": "off"
     },
     "overrides": [
         {

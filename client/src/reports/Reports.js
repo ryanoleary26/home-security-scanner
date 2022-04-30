@@ -1,7 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading */
 /* eslint max-len: ["error", { "code": 120 }] */
-
-// import React from 'react';
 import {
   React,
   useState,
@@ -12,13 +9,10 @@ import axios from 'axios';
 
 // Style
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './Home.css';
+import './Reports.css';
 import '../global.css';
 
 // Components
-import SearchIcon from '@mui/icons-material/Search';
-import CalendarIcon from '@mui/icons-material/CalendarToday';
-
 import {
   Grid,
   Box,
@@ -30,18 +24,16 @@ import {
   TableFooter,
   TableRow,
   TablePagination,
-  Button,
-  IconButton,
   Paper,
   CircularProgress,
   Snackbar,
   Fade,
   Alert,
+  IconButton,
 } from '@mui/material';
 import PropTypes from 'prop-types';
 import { useTheme } from '@mui/material/styles';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
-import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
@@ -114,7 +106,7 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-function Home() {
+function Reports() {
   const [loadingReportData, setLoadingReportData] = useState(true);
   const [reportData, setReportData] = useState([]);
   const [reportError, setReportError] = useState({
@@ -211,8 +203,9 @@ function Home() {
   return (
     <Grid container sx={{ paddingBottom: 30 }}>
       <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <section id="overview">
-          <h1>Scan Overview</h1>
+        <section>
+          <h1>Report Results</h1>
+          <p>Report results can be found below.</p>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
@@ -295,68 +288,8 @@ function Home() {
           </Alert>
         </Snackbar>
       </Grid>
-
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <section id="newscan">
-          <h1>New Scan</h1>
-          <p>Click the button below to initiate a new scan.</p>
-
-          <Button
-            variant="contained"
-            startIcon={<SearchIcon />}
-            href="/newscan"
-          >
-            New Scan
-          </Button>
-        </section>
-      </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <section id="newscan">
-          <h1>Scan Reports</h1>
-          <p>Click the button below to view an overview of scan reports.</p>
-
-          <Button
-            variant="contained"
-            startIcon={<AssessmentOutlinedIcon />}
-            href="/report"
-          >
-            Reports
-          </Button>
-        </section>
-      </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <section id="schedulescan">
-          <h1>Schedule a Scan</h1>
-          <p>Click the button below to create a new scan schedule.</p>
-          <Button
-            variant="contained"
-            startIcon={<CalendarIcon />}
-            href="/schedules"
-            disabled
-          >
-            New Schedule
-          </Button>
-        </section>
-      </Grid>
-      <Grid item xs={12} sm={12} md={12} lg={12} xl={12}>
-        <section id="modifyschedule">
-          <h1>Modify a Scheduled Scan</h1>
-          <p>
-            Click the button below to modify or delete an existing scan
-            schedule.
-          </p>
-          <Button
-            variant="contained"
-            startIcon={<CalendarIcon />}
-            href="/schedules#modify"
-            disabled
-          >
-            Modify Schedule
-          </Button>
-        </section>
-      </Grid>
     </Grid>
   );
 }
 
-export default Home;
+export default Reports;
