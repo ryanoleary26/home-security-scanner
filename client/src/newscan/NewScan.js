@@ -538,7 +538,7 @@ function NewScan() {
               <TableRow>
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25]}
-                  colSpan={5}
+                  colSpan={6}
                   count={scanData.scans ? scanData.scans.length : 0}
                   rowsPerPage={rowsPerPage}
                   page={page}
