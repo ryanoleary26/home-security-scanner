@@ -279,7 +279,7 @@ function NewScan() {
             setBackdropState(false);
           }
         }).catch((axiosError) => {
-          showSnack(` ${axiosError}`, 'error');
+          showSnack(`Error connecting to API: ${axiosError}`, 'error');
           setBackdropState(false);
         });
       } catch (e) {
@@ -338,7 +338,7 @@ function NewScan() {
         });
       } catch (err) {
         setScanError({ error: true, message: `${err}` });
-        showSnack(`${err} `, 'error');
+        showSnack(`Error connecting to API: ${err} `, 'error');
       }
     }
     if (loadingScanData) {
